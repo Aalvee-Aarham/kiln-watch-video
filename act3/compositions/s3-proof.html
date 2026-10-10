@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #s3-A, #s3-B, #s3-C { position: absolute; inset: 0; }
+        .s3-kick { position: absolute; left: 120px; top: 238px; }
+        #s3-head { position: absolute; left: 112px; top: 282px; font-size: 112px; line-height: 0.98; }
+        #s3-head span { display: block; }
+        #s3-h2 { color: var(--ember); }
+        #s3-strips { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        /* B */
+        #s3-big { position: absolute; left: 96px; top: 262px; font-size: 300px; line-height: 1; color: var(--alarm); font-variant-numeric: tabular-nums; }
+        #s3-blab { position: absolute; left: 124px; top: 600px; color: var(--ink); }
+        #s3-split { position: absolute; left: 124px; top: 650px; width: 640px; height: 4px; display: flex; }
+        #s3-split span { display: block; height: 100%; }
+        #s3-cam { width: 97%; background: var(--alarm); box-shadow: 0 0 16px rgba(255, 74, 72, 0.6); transform-origin: 0 50%; }
+        #s3-real { width: 3%; margin-left: 4px; background: var(--ember); }
+        #s3-splitlab { position: absolute; left: 124px; top: 676px; width: 650px; display: flex; justify-content: space-between; }
+        #s3-chart { position: absolute; left: 960px; top: 250px; width: 860px; height: 520px; overflow: visible; }
+        #s3-call { position: absolute; left: 0; top: 0; padding: 12px 16px; background: rgba(6, 8, 12, 0.6); border: 1px solid var(--hair); backdrop-filter: blur(10px); font-family: var(--sans); font-weight: 500; font-size: 15px; letter-spacing: 0.18em; line-height: 1.9; text-transform: uppercase; white-space: nowrap; }
+        #s3-seam { position: absolute; left: 1000px; top: 846px; }
+        /* C */
+        #s3-qlab { position: absolute; left: 0; right: 0; top: 168px; text-align: center; }
+        #s3-qtitle { position: absolute; left: 0; right: 0; top: 196px; text-align: center; font-size: 84px; }
+        #s3-cards { position: absolute; left: 0; right: 0; top: 318px; display: flex; justify-content: center; gap: 60px; }
+        .s3-card { position: relative; width: 540px; height: 540px; background: rgba(8, 10, 14, 0.6); border: 1px solid rgba(243, 238, 228, 0.14); border-radius: 6px; backdrop-filter: blur(16px); }
+        .s3-year { position: absolute; left: 38px; top: 26px; font-size: 120px; line-height: 1; }
+        .s3-mini { position: absolute; right: 34px; top: 34px; width: 210px; height: 270px; background-image: url("assets/tex/rday.jpg"); background-size: 1564px 1564px; background-position: -1027.7px -596.5px; filter: brightness(0.55) saturate(0.8); border-radius: 2px; }
+        .s3-minisvg { position: absolute; right: 34px; top: 34px; width: 210px; height: 270px; overflow: visible; }
+        .s3-val { position: absolute; left: 38px; bottom: 112px; font-size: 112px; line-height: 1; font-variant-numeric: tabular-nums; }
+        .s3-bar { position: absolute; left: 40px; right: 40px; bottom: 82px; height: 3px; background: var(--hair); }
+        .s3-bar span { display: block; height: 100%; transform-origin: 0 50%; }
+        .s3-tag { position: absolute; left: 40px; bottom: 36px; }
+        #s3-stamp { position: absolute; left: 760px; top: 800px; width: 400px; padding: 14px 0; text-align: center; border: 2px solid var(--ember); border-radius: 4px; font-family: var(--sans); font-weight: 600; font-size: 26px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ember); background: rgba(10, 6, 4, 0.75); box-shadow: 0 0 40px rgba(255, 122, 61, 0.35); }
+      </style>
+      <div id="s3-root" data-composition-id="s3-proof" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div class="scrim scrim-l" id="s3-scrim"></div>
+        <div id="s3-A">
+          <div class="kick s3-kick">The proof · harmonized</div>
+          <div class="serif" id="s3-head"><span id="s3-h1">The jump?</span><span id="s3-h2"><i>Gone. Everywhere.</i></span></div>
+          <svg id="s3-strips" viewBox="0 0 1920 1080"></svg>
+        </div>
+        <div id="s3-B">
+          <div class="kick s3-kick">Bangladesh · the 2012 jump</div>
+          <div class="serif" id="s3-big">−0%</div>
+          <div class="lab" id="s3-blab">Fake jump: the camera, not the fires</div>
+          <div id="s3-split"><span id="s3-cam"></span><span id="s3-real"></span></div>
+          <div class="lab" id="s3-splitlab"><span style="color:#ff8a86">97% camera</span><span style="color:var(--ember)">3% real</span></div>
+          <svg id="s3-chart" viewBox="0 0 860 520"></svg>
+          <div id="s3-call"><span style="color:var(--modis)">● MODIS saw 23.7</span><br /><span style="color:var(--ember)">● Corrected VIIRS 23.4</span></div>
+          <div class="lab" id="s3-seam">Seam tested in <b style="color:var(--ember)">5 regions</b> · 95% band</div>
+        </div>
+        <div id="s3-C">
+          <div class="lab" id="s3-qlab">Back to the quiz · raw record</div>
+          <div class="serif" id="s3-qtitle">Which year burned more?</div>
+          <div id="s3-cards">
+            <div class="s3-card" id="s3-cardA"><div class="serif s3-year"><i>2010</i></div><div class="s3-mini"></div><svg class="s3-minisvg" id="s3-miniA" viewBox="0 0 210 270"></svg><div class="serif s3-val" id="s3-valA" style="color:var(--modis)">22.7</div><div class="s3-bar"><span id="s3-barA" style="background:var(--modis)"></span></div><div class="lab s3-tag">MODIS era</div></div>
+            <div class="s3-card" id="s3-cardB"><div class="serif s3-year"><i>2016</i></div><div class="s3-mini"></div><svg class="s3-minisvg" id="s3-miniB" viewBox="0 0 210 270"></svg><div class="serif s3-val" id="s3-valB" style="color:var(--alarm)">46.3</div><div class="s3-bar"><span id="s3-barB" style="background:var(--alarm)"></span></div><div class="lab s3-tag" id="s3-tagB">Raw VIIRS</div></div>
+          </div>
+          <div id="s3-stamp">Answer: 2010</div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, T = K.TR, J = K.J2012, MONTHS = K.MONTHS;
+          var tl = gsap.timeline({ paused: true });
+
+          // ================= A: the clue's five traces settle (same layout as s1, so the cut matches)
+          var tr = K.buildTraces(document.getElementById("s3-strips"), { id: "s3" });
+          tr.rows.forEach(function (r) {
+            r.pre.setAttribute("d", K.line(r.s.raw.slice(0, J + 1).map(function (v, m) { return [T.x(m), r.amp(v)]; })));
+            r.post.setAttribute("stroke-width", 2.4);
+          });
+          tr.ax.forEach(function (a) { a.setAttribute("opacity", 1); });
+
+          // ================= B: Bangladesh seam chart (raw VIIRS collapses onto the MODIS level)
+          var yrs = [], corr = [18.4, 21.2, 19.1, 24.0, 20.3, 22.1, 25.6, 22.7, 20.2, 23.4, 19.3, 21.0, 17.2, 13.2, 15.4, 18.1, 16.2, 14.3, 17.0, 15.1, 16.3, 18.0];
+          for (var y = 2003; y <= 2024; y++) yrs.push(y);
+          var rawV = corr.map(function (v, i) { return yrs[i] >= 2012 ? (yrs[i] === 2016 ? 46.3 : v * 3.1) : v; });
+          var ch = document.getElementById("s3-chart"), CX0 = 20, CX1 = 840, CY0 = 30, CY1 = 460;
+          var cx = function (i) { return CX0 + (i / 21) * (CX1 - CX0); };
+          var defs = K.svg("defs", {}, ch), fl = K.svg("filter", { id: "s3-cglow", x: "-20%", y: "-20%", width: "140%", height: "140%" }, defs);
+          K.svg("feGaussianBlur", { stdDeviation: 3.5, result: "b" }, fl);
+          var fm = K.svg("feMerge", {}, fl); K.svg("feMergeNode", { in: "b" }, fm); K.svg("feMergeNode", { in: "SourceGraphic" }, fm);
+          K.svg("line", { x1: CX0, x2: CX1, y1: CY1, y2: CY1, stroke: "rgba(243,238,228,0.2)", "stroke-width": 1 }, ch);
+          [[0, "2003"], [9, "2012"], [21, "2024"]].forEach(function (a) {
+            var t = K.svg("text", { x: cx(a[0]), y: CY1 + 32, "text-anchor": "middle", "font-family": "JetBrains Mono", "font-size": 15, fill: "rgba(243,238,228,0.55)" }, ch);
+            t.textContent = a[1];
+          });
+          K.svg("line", { x1: cx(9), x2: cx(9), y1: CY0, y2: CY1, stroke: "rgba(243,238,228,0.25)", "stroke-width": 1, "stroke-dasharray": "3 7" }, ch);
+          var cBand = K.svg("path", { d: "", fill: "#ff7a3d", opacity: 0 }, ch);
+          var cMod = K.svg("path", { d: "", fill: "none", stroke: "#f2b862", "stroke-width": 2.6, "stroke-linejoin": "round", filter: "url(#s3-cglow)" }, ch);
+          var cVi = K.svg("path", { d: "", fill: "none", stroke: "#ff4a48", "stroke-width": 2.6, "stroke-linejoin": "round", filter: "url(#s3-cglow)" }, ch);
+          var dMod = K.svg("circle", { r: 8, fill: "#f2b862", stroke: "#000", "stroke-width": 2 }, ch);
+          var dVi = K.svg("circle", { r: 6, fill: "#ff7a3d", opacity: 0 }, ch);
+          var callEl = document.getElementById("s3-call");
+
+          // ================= C: quiz minis on a real Blue Marble crop of Bangladesh
+          function mini(id, n) {
+            var el = document.getElementById(id), out = [];
+            var mp = function (lon, lat) { return [((lon - 88) / 4.7) * 210, ((26.65 - lat) / 6.05) * 270]; };
+            var d = "";
+            K.BD.rings.forEach(function (r) { for (var i = 0; i < r.length; i += 2) { var q = mp(r[i], r[i + 1]); d += (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); } d += "Z"; });
+            K.svg("path", { d: d, fill: "none", stroke: "rgba(243,238,228,0.5)", "stroke-width": 1 }, el);
+            for (var i = 0; i < n; i++) { var f = K.BD.fires[(i * 7) % K.BD.fires.length], q = mp(f[0], f[1]); out.push(K.svg("circle", { cx: q[0], cy: q[1], r: 2.6, fill: "#ff7a3d" }, el)); }
+            return out;
+          }
+          mini("s3-miniA", 90);
+          var mB = mini("s3-miniB", 184);
+          var qlab = document.getElementById("s3-qlab"), tagB = document.getElementById("s3-tagB"), valB = document.getElementById("s3-valB"), bigEl = document.getElementById("s3-big");
+
+          K.drive(tl, 13, function (t) {
+            // A — slow-motion settle 1.2 -> 3.6, red line fades
+            var k = K.inOut(K.p(t, 1.2, 3.6));
+            tr.rows.forEach(function (st) {
+              var pts = [], up = [], dn = [];
+              for (var m = J; m < MONTHS; m++) {
+                var v = K.lerp(st.s.raw[m], st.s.fixed[m], k), x = T.x(m), yv = st.amp(v);
+                pts.push([x, yv]); up.push([x, yv - 8]); dn.unshift([x, Math.min(st.base, yv + 8)]);
+              }
+              st.post.setAttribute("d", K.line(pts));
+              st.post.setAttribute("stroke", k > 0.5 ? "#ff7a3d" : "#ff4a48");
+              st.band.setAttribute("d", K.line(up.concat(dn)) + "Z");
+              st.band.setAttribute("opacity", (0.22 * K.p(t, 3.2, 4.2)).toFixed(3));
+              st.lab.setAttribute("fill", k > 0.5 ? "rgba(243,238,228,0.85)" : "rgba(255,170,160,0.95)");
+            });
+            var redA = 1 - K.p(t, 2.8, 3.6);
+            tr.red.setAttribute("opacity", redA.toFixed(3)); tr.glow.setAttribute("opacity", (0.16 * redA).toFixed(3));
+            tr.ax[1].setAttribute("fill", redA > 0.5 ? "#ff6a66" : "rgba(243,238,228,0.7)");
+
+            // B — counter, raw collapse, MODIS dot lands
+            bigEl.textContent = "−" + Math.round(97 * K.out(K.p(t, 5.4, 6.6))) + "%";
+            var col = K.inOut(K.p(t, 5.8, 6.9)), ymax = K.lerp(52, 30, col);
+            var cy = function (v) { return CY1 - (v / ymax) * (CY1 - CY0); };
+            var draw = K.p(t, 4.9, 5.6), nMod = Math.round(draw * 9) + 1, mod = [], vi = [], up = [], dn = [];
+            for (var i = 0; i <= 9 && i < nMod; i++) mod.push([cx(i), cy(corr[i])]);
+            for (var j = 9; j <= 21; j++) vi.push([cx(j), cy(K.lerp(rawV[j], corr[j], col))]);
+            for (var b = 0; b <= 21; b++) { up.push([cx(b), cy(corr[b] * 1.12)]); dn.unshift([cx(b), cy(corr[b] * 0.88)]); }
+            cMod.setAttribute("d", K.line(mod));
+            cVi.setAttribute("d", draw >= 1 ? K.line(vi) : "");
+            cVi.setAttribute("stroke", col > 0.5 ? "#ff7a3d" : "#ff4a48");
+            cBand.setAttribute("d", K.line(up.concat(dn)) + "Z");
+            cBand.setAttribute("opacity", (0.16 * K.p(t, 6.9, 7.5)).toFixed(3));
+            var land = K.out(K.p(t, 7.0, 7.4));
+            dMod.setAttribute("cx", cx(9)); dMod.setAttribute("cy", K.lerp(CY0 - 40, cy(23.7), land));
+            dMod.setAttribute("opacity", land > 0 ? 1 : 0);
+            dVi.setAttribute("cx", cx(9) + 14); dVi.setAttribute("cy", cy(23.4)); dVi.setAttribute("opacity", K.p(t, 6.9, 7.1));
+            callEl.style.left = 960 + cx(9) + 36 + "px"; callEl.style.top = 250 + cy(23.7) - 130 + "px";
+
+            // C — 2016 shrinks once harmonized
+            var sh = K.inOut(K.p(t, 10.1, 11.0));
+            valB.textContent = K.lerp(46.3, 13.2, sh).toFixed(1);
+            mB.forEach(function (c, i) { c.setAttribute("opacity", i < K.lerp(184, 52, sh) ? 1 : 0); });
+            qlab.textContent = t < 10.1 ? "Back to the quiz · raw record" : "Back to the quiz · harmonized";
+            tagB.textContent = t < 10.4 ? "Raw VIIRS" : "Harmonized";
+          });
+
+          // A
+          tl.fromTo("#s3-A", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
+          tl.fromTo("#s3-A .s3-kick", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 0.1);
+          tl.fromTo("#s3-h1", { opacity: 0, y: 30, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power3.out" }, 0.2);
+          tl.fromTo("#s3-h2", { opacity: 0, y: 30, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power3.out" }, 3.4);
+          tl.to("#s3-A", { opacity: 0, scale: 0.98, duration: 0.4, ease: "power2.in" }, 4.5);
+          // B
+          tl.fromTo("#s3-B", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 4.8);
+          tl.fromTo("#s3-cam", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "power2.out" }, 5.4);
+          tl.fromTo("#s3-real", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 6.4);
+          tl.fromTo("#s3-splitlab", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 6.4);
+          tl.fromTo("#s3-call", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 7.3);
+          tl.fromTo("#s3-seam", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 7.5);
+          tl.to("#s3-B", { opacity: 0, duration: 0.35 }, 8.3);
+          tl.to("#s3-scrim", { opacity: 0.4, duration: 0.4 }, 8.3);
+          // C — cards slide in from the corner where Act 2 parked them
+          tl.fromTo("#s3-C", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 8.5);
+          tl.fromTo(["#s3-qlab", "#s3-qtitle"], { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", stagger: 0.08 }, 8.6);
+          tl.fromTo("#s3-cardA", { x: 900, y: 400, scale: 0.3, rotation: 6, opacity: 0 }, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.9, ease: "expo.out" }, 8.6);
+          tl.fromTo("#s3-cardB", { x: 400, y: 400, scale: 0.3, rotation: 6, opacity: 0 }, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.9, ease: "expo.out" }, 8.7);
+          tl.fromTo("#s3-barA", { scaleX: 0 }, { scaleX: 22.7 / 46.3, duration: 0.6, ease: "power2.out" }, 9.1);
+          tl.fromTo("#s3-barB", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.out" }, 9.2);
+          tl.to("#s3-barB", { scaleX: 13.2 / 46.3, backgroundColor: "#ff7a3d", duration: 0.9, ease: "power2.inOut" }, 10.1);
+          tl.to("#s3-valB", { color: "#ff7a3d", duration: 0.3 }, 10.4);
+          tl.to("#s3-cardB", { opacity: 0.5, duration: 0.4 }, 11.2);
+          tl.to("#s3-cardA", { borderColor: "rgba(255,122,61,0.8)", boxShadow: "0 0 60px rgba(255,122,61,0.25)", duration: 0.3 }, 11.2);
+          tl.fromTo("#s3-stamp", { opacity: 0, scale: 1.6, rotation: -8 }, { opacity: 1, scale: 1, rotation: -4, duration: 0.25, ease: "power4.in" }, 11.2);
+          tl.to("#s3-root", { opacity: 0, duration: 0.35 }, 12.65);
+          window.__timelines["s3-proof"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

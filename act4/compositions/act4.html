@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html>
+  <head><meta charset="UTF-8"></head>
+  <body>
+    <template>
+      <style>
+        #a4-root { position: absolute; inset: 0; overflow: hidden; background: #000000; text-shadow: 0 1px 3px rgba(0,0,0,.85), 0 0 14px rgba(0,0,0,.55); }
+        #a4-root svg text { paint-order: stroke; stroke: rgba(0,0,0,.75); stroke-width: 3px; stroke-linejoin: round; }
+        #a4-cv { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+        #a4-fx-cv { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+        #a4-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 95% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%); }
+        .a4-abs { position: absolute; left: 0; top: 0; }
+        .a4-mono { font-family: var(--mono); letter-spacing: 0.12em; }
+        .a4-kick { font-family: var(--sans); font-weight: 600; font-size: 16px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--ember); }
+        .a4-badge { display: inline-block; padding: 7px 12px; border-radius: 4px; font-family: var(--mono); font-size: 15px; letter-spacing: 0.1em; color: var(--dim); background: rgba(10, 13, 18, 0.32); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); border: 1px solid rgba(243, 238, 228, 0.16); white-space: nowrap; }
+        .a4-badge b { color: var(--ember); font-weight: 700; }
+
+        /* wordmark */
+        #a4-mark { position: absolute; left: 80px; top: 48px; font-family: var(--mono); font-size: 20px; font-weight: 700; letter-spacing: 0.22em; color: var(--ink); display: flex; align-items: center; gap: 12px; text-shadow: 0 1px 3px rgba(0,0,0,.95), 0 0 20px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,1); }
+        #a4-mark span { text-shadow: 0 1px 3px rgba(0,0,0,.95), 0 0 20px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,1); }
+        #a4-mark i { width: 10px; height: 10px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px var(--ember); }
+        #a4-mark span { color: var(--dim); font-weight: 400; }
+
+        /* A · what changes */
+        #a4-tl { position: absolute; left: 210px; top: 140px; width: 1500px; height: 560px; }
+        #a4-tl .lab { position: absolute; left: 0; font-family: var(--sans); font-weight: 500; font-size: 15px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+        #a4-b1 { position: absolute; left: 500px; top: 92px; width: 821px; height: 22px; border-radius: 3px; background: #55504a; transform-origin: 0 50%; }
+        #a4-wall { position: absolute; left: 497px; top: 78px; width: 4px; height: 50px; background: var(--alarm); box-shadow: 0 0 14px rgba(255,74,72,0.7); }
+        #a4-wallt { position: absolute; right: 1020px; top: 90px; font-family: var(--mono); font-size: 18px; letter-spacing: 0.1em; color: var(--ink); white-space: nowrap; }
+        #a4-b2 { position: absolute; left: 0; top: 182px; width: 1321px; transform-origin: 100% 50%; height: 22px; border-radius: 3px; background: linear-gradient(90deg, #ff8a4c, #ff7a3d); box-shadow: 0 0 26px rgba(255,122,61,0.55); }
+        #a4-tail { position: absolute; left: 1321px; top: 182px; width: 179px; height: 22px; background: linear-gradient(90deg, #ff7a3d, rgba(255,122,61,0)); transform-origin: 0 50%; }
+        #a4-axis { position: absolute; left: 0; top: 246px; width: 1500px; height: 2px; background: #3a3632; transform-origin: 0 50%; }
+        #a4-ticks span { position: absolute; top: 262px; font-family: var(--mono); font-size: 18px; color: var(--dim); transform: translateX(-50%); white-space: nowrap; }
+        #a4-modis { position: absolute; left: 1328px; top: 44px; width: 0; height: 204px; border-left: 2px dashed var(--modis); }
+        #a4-modist { position: absolute; left: 1340px; top: 30px; font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em; color: var(--modis); white-space: nowrap; }
+        #a4-yrsrow { position: absolute; left: 0; top: 340px; display: flex; align-items: baseline; gap: 26px; }
+        #a4-yrs { font-family: var(--sans); font-weight: 900; font-size: 150px; line-height: 0.9; letter-spacing: -0.04em; color: var(--ink); font-variant-numeric: tabular-nums; }
+        #a4-yrsw { font-family: var(--sans); font-weight: 800; font-size: 56px; color: var(--ember); }
+        #a4-yrsub { position: absolute; left: 0; top: 490px; font-family: var(--sans); font-size: 34px; color: #d8d2c4; white-space: nowrap; }
+
+        /* B · Bhaluka */
+        #a4-spark { width: 0; height: 0; }
+        #a4-spark i { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: #ffb27a; box-shadow: 0 0 18px 6px rgba(255,122,61,0.8); }
+        #a4-spark b { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid rgba(255,122,61,0.7); }
+        #a4-q { position: absolute; left: 1020px; top: 108px; font-family: var(--serif); font-weight: 400; font-size: 72px; color: var(--ink); text-shadow: 0 6px 50px rgba(0,0,0,0.6); white-space: nowrap; }
+        #a4-q em { font-style: italic; color: var(--ember); }
+        #a4-a { position: absolute; left: 1020px; top: 196px; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 72px; color: var(--ember); text-shadow: 0 6px 50px rgba(0,0,0,0.6); white-space: nowrap; }
+        #a4-box { border: 2.5px solid var(--ember); background: rgba(255,122,61,0.08); box-shadow: 0 0 20px rgba(255,122,61,0.35); }
+        #a4-cur { width: 30px; height: 36px; }
+        #a4-lead1 { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #a4-cal { position: absolute; left: 1020px; top: 320px; width: 800px; height: 590px; border-radius: 14px; background: rgba(10, 13, 18, 0.3); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); border: 1px solid rgba(243, 238, 228, 0.16); }
+        #a4-cal .h { position: absolute; left: 36px; top: 28px; font-family: var(--serif); font-weight: 400; font-size: 38px; color: var(--ink); white-space: nowrap; }
+        #a4-cal .hr { position: absolute; right: 36px; top: 40px; font-family: var(--mono); font-size: 16px; letter-spacing: 0.14em; color: var(--dim); }
+        #a4-cal .l { position: absolute; left: 36px; font-family: var(--sans); font-weight: 500; font-size: 14px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+        #a4-norm { position: absolute; left: 36px; top: 132px; width: 728px; height: 70px; border-bottom: 1.5px solid #3a3632; }
+        #a4-norm div { position: absolute; bottom: 0; width: 40px; background: #6b6660; border-radius: 2px 2px 0 0; }
+        #a4-normt { position: absolute; left: 36px; top: 214px; font-family: var(--mono); font-size: 21px; color: var(--ink); white-space: nowrap; }
+        #a4-months { position: absolute; left: 36px; top: 296px; width: 728px; height: 20px; }
+        #a4-months span { position: absolute; font-family: var(--mono); font-size: 15px; color: var(--dim); }
+        #a4-grid { position: absolute; left: 36px; top: 322px; width: 728px; height: 96px; }
+        #a4-grid div { position: absolute; width: 11px; height: 11px; border-radius: 2px; background: #1c1a17; }
+        #a4-det { position: absolute; left: 36px; top: 440px; font-family: var(--mono); font-size: 21px; color: var(--ink); white-space: nowrap; }
+        #a4-det b { color: #ffb27a; font-weight: 700; }
+        #a4-unu { position: absolute; left: 220px; top: 484px; padding: 8px 16px; border-radius: 4px; background: var(--ember); font-family: var(--mono); font-weight: 700; font-size: 20px; letter-spacing: 0.12em; color: #140904; white-space: nowrap; }
+        #a4-calb { position: absolute; left: 36px; top: 540px; }
+
+        /* C · users */
+        .a4-u { position: absolute; top: 470px; width: 560px; height: 540px; border-radius: 14px; background: rgba(10, 13, 18, 0.3); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); border: 1px solid rgba(243, 238, 228, 0.16); }
+        #a4-u1 { left: 60px; } #a4-u2 { left: 680px; } #a4-u3 { left: 1300px; }
+        .a4-u .role { position: absolute; left: 28px; top: 20px; font-family: var(--serif); font-weight: 400; font-size: 36px; color: var(--ink); white-space: nowrap; }
+        .a4-u .pl { position: absolute; right: 28px; top: 34px; font-family: var(--sans); font-weight: 500; font-size: 13px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+        .a4-u svg { position: absolute; left: 28px; top: 84px; width: 504px; height: 262px; overflow: visible; }
+        .a4-u .cap { position: absolute; left: 28px; top: 372px; width: 504px; font-family: var(--sans); font-size: 26px; line-height: 1.3; color: #ded7c8; }
+        .a4-u .a4-badge { position: absolute; left: 28px; top: 472px; }
+        #a4-lead { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #a4-news { position: absolute; left: 700px; top: 330px; width: 600px; padding: 22px 26px; background: #f4f1ea; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); transform: rotate(-1.5deg); }
+        #a4-news .src { font-family: var(--mono); font-size: 16px; letter-spacing: 0.14em; color: #9b1c1c; font-weight: 700; }
+        #a4-news .hd { margin-top: 10px; font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-size: 32px; line-height: 1.2; color: #14110d; }
+
+        /* D · scale */
+        #a4-live { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; transform-origin: 80px 104px; }
+        #a4-live .pill { display: flex; align-items: center; gap: 14px; padding: 10px 22px; border-radius: 40px; background: var(--alarm); font-family: var(--mono); font-weight: 700; font-size: 34px; letter-spacing: 0.2em; color: #fff; }
+        #a4-live .pill i { width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+        #a4-live .big { font-family: var(--sans); font-weight: 900; font-size: 150px; letter-spacing: -0.03em; line-height: 0.95; color: var(--ink); text-shadow: 0 6px 40px rgba(0,0,0,0.8); white-space: nowrap; }
+        #a4-tag { position: absolute; left: 80px; top: 92px; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 700; font-size: 18px; letter-spacing: 0.18em; color: var(--ink); }
+        #a4-tag i { width: 10px; height: 10px; border-radius: 50%; background: var(--alarm); box-shadow: 0 0 10px var(--alarm); }
+        .a4-cn { font-family: var(--mono); font-weight: 700; font-size: 17px; letter-spacing: 0.16em; color: #fff; white-space: nowrap; transform: translate(-50%, -50%); text-shadow: 0 2px 10px #000, 0 0 4px #000; }
+        #a4-kbox i { position: absolute; left: -34px; top: -34px; width: 68px; height: 68px; border: 2.5px solid #fff; box-shadow: 0 0 18px rgba(255,255,255,0.4); }
+        #a4-kcard { position: absolute; left: 60px; top: -150px; width: 660px; padding: 22px 26px 24px; border-left: 5px solid var(--alarm); border-radius: 0 10px 10px 0; background: rgba(10, 13, 18, 0.34); backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%); }
+        #a4-kcard .k { font-family: var(--mono); font-size: 18px; letter-spacing: 0.14em; color: #ff9a9c; white-space: nowrap; }
+        #a4-kcard .b { margin-top: 10px; font-family: var(--sans); font-weight: 800; font-size: 48px; color: #fff; white-space: nowrap; }
+        #a4-kcard .s { margin-top: 8px; font-family: var(--sans); font-size: 26px; color: #d8d2c4; }
+        #a4-stats { position: absolute; left: 0; right: 0; top: 880px; display: flex; justify-content: center; gap: 16px; }
+        #a4-stats div { padding: 12px 22px; border-radius: 6px; background: rgba(10, 13, 18, 0.32); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); border: 1px solid rgba(243, 238, 228, 0.16); font-family: var(--mono); font-size: 22px; letter-spacing: 0.12em; color: var(--ink); white-space: nowrap; }
+        #a4-stats b { color: var(--ember); }
+        #a4-nasa { position: absolute; left: 0; right: 0; top: 968px; text-align: center; font-family: var(--mono); font-size: 19px; letter-spacing: 0.16em; color: var(--dim); white-space: nowrap; }
+        #a4-nasa b { color: var(--ink); font-weight: 700; }
+        #a4-any { position: absolute; left: 0; right: 0; top: 140px; text-align: center; font-family: var(--serif); font-weight: 400; font-size: 72px; color: var(--ink); text-shadow: 0 4px 30px #000; white-space: nowrap; }
+        #a4-kiln { position: absolute; left: 120px; top: 700px; }
+        #a4-kiln .n { margin-top: 10px; font-family: var(--sans); font-weight: 900; font-size: 110px; line-height: 0.95; letter-spacing: -0.03em; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; text-shadow: 0 4px 30px #000; }
+        #a4-kiln .s { margin-top: 10px; font-family: var(--sans); font-size: 32px; color: #d8d2c4; white-space: nowrap; text-shadow: 0 2px 16px #000; }
+
+        /* E · effort */
+        #a4-eff { position: absolute; left: 260px; top: 120px; width: 1400px; height: 170px; }
+        #a4-effl1, #a4-effl2 { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-family: var(--mono); font-size: 26px; letter-spacing: 0.2em; white-space: nowrap; }
+        #a4-effl1 { color: #a8a194; }
+        #a4-effl2 { color: var(--ember); font-weight: 700; }
+        #a4-cells { position: absolute; left: 0; top: 60px; width: 1400px; height: 56px; }
+        #a4-cells div { position: absolute; top: 0; width: 21px; height: 56px; border-radius: 3px; background: #211f1c; }
+        .a4-mini { width: 0; height: 0; }
+        .a4-mini div { position: absolute; left: -66px; top: -8px; display: flex; gap: 2px; padding: 3px; border-radius: 3px; background: rgba(4,6,10,0.8); }
+        .a4-mini span { width: 8px; height: 10px; border-radius: 1px; background: #3a3632; }
+        .a4-mini span.on { background: var(--ember); box-shadow: 0 0 8px var(--ember); }
+
+        /* F · the ask */
+        #a4-need { position: absolute; left: 120px; top: 360px; width: 760px; }
+        #a4-need .big { margin-top: 22px; font-family: var(--serif); font-weight: 400; font-size: 84px; line-height: 1.08; letter-spacing: -0.01em; color: var(--ink); text-shadow: 0 6px 50px rgba(0,0,0,0.6); }
+        .a4-pin { width: 0; height: 0; }
+        .a4-pin i { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; background: #ffb27a; box-shadow: 0 0 14px 4px rgba(255,122,61,0.7); }
+        .a4-pin b { position: absolute; left: 14px; top: -14px; display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 3px; font-family: var(--mono); font-weight: 400; font-size: 13px; letter-spacing: 0.14em; color: var(--dim); background: rgba(10,13,18,0.4); backdrop-filter: blur(10px); border: 1px dashed rgba(243,238,228,0.3); white-space: nowrap; }
+        .a4-pin b u { width: 12px; height: 12px; border: 1.5px solid #97948d; border-radius: 2px; }
+
+        /* G · the ending */
+        #a4-yr { position: absolute; left: 0; right: 0; top: 40px; text-align: center; font-family: var(--sans); font-weight: 900; font-size: 96px; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+        #a4-chart { position: absolute; left: 360px; top: 800px; width: 1200px; height: 220px; overflow: visible; }
+
+        /* H · the forest */
+        #a4-forest { position: absolute; inset: 0; overflow: hidden; }
+        #a4-fsvg { position: absolute; left: -96px; top: -54px; width: 2112px; height: 1188px; }
+        #a4-fcal { position: absolute; left: 412px; top: 900px; width: 1096px; height: 120px; }
+        #a4-fcal .t { position: absolute; left: 0; top: 0; font-family: var(--mono); font-size: 20px; letter-spacing: 0.16em; color: #f2e6da; white-space: nowrap; text-shadow: 0 2px 12px #000; }
+        #a4-fcal .t b { color: #ffb27a; }
+        #a4-fdays { position: absolute; left: 0; top: 46px; width: 1096px; height: 26px; }
+        #a4-fdays div { position: absolute; top: 0; width: 2px; height: 26px; background: rgba(240, 225, 210, 0.22); }
+        #a4-night { position: absolute; inset: 0; background: #020305; }
+
+        /* I · title */
+        #a4-title { position: absolute; inset: 0; }
+        #a4-one { position: absolute; left: 0; right: 0; top: 220px; text-align: center; font-family: var(--serif); font-weight: 400; font-size: 100px; letter-spacing: -0.01em; line-height: 1.12; color: var(--ink); text-shadow: 0 6px 50px rgba(0,0,0,0.6); }
+        #a4-one div { white-space: nowrap; }
+        #a4-one .e { font-style: italic; color: var(--ember); }
+        #a4-card { position: absolute; left: 0; right: 0; top: 560px; text-align: center; }
+        #a4-wm { display: inline-flex; align-items: center; gap: 22px; font-family: var(--sans); font-weight: 900; font-size: 96px; letter-spacing: 0.06em; color: var(--ink); }
+        #a4-wm i { width: 26px; height: 26px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 30px var(--ember); }
+        #a4-team { margin-top: 14px; font-family: var(--mono); font-size: 28px; letter-spacing: 0.2em; color: #d8d2c4; }
+        #a4-url { margin-top: 18px; font-family: var(--mono); font-size: 26px; letter-spacing: 0.06em; color: var(--ember); }
+        #a4-pilot { margin-top: 30px; display: inline-block; padding: 12px 26px; border: 2px solid var(--ember); border-radius: 6px; background: rgba(10,13,18,0.32); backdrop-filter: blur(14px); font-family: var(--sans); font-weight: 700; font-size: 30px; color: var(--ink); }
+        #a4-montage { position: absolute; inset: 0; }
+
+        /* J · final beat */
+        #a4-new i { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; background: #ffd0a8; box-shadow: 0 0 20px 8px rgba(255,122,61,0.85); }
+        #a4-new b { position: absolute; left: -40px; top: -40px; width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(255,122,61,0.8); }
+        #a4-newt { position: absolute; left: 34px; top: -26px; font-family: var(--mono); font-size: 22px; letter-spacing: 0.12em; color: var(--ink); white-space: nowrap; line-height: 1.6; }
+        #a4-newt div + div { color: var(--ember); }
+        #a4-black { position: absolute; inset: 0; background: #000; opacity: 0; }
+      </style>
+      <div data-hf-id="hf-zpld" id="a4-root" data-composition-id="act4" data-width="1920" data-height="1080">
+        <canvas data-hf-id="hf-pgwh" id="a4-cv" width="1920" height="1080" data-layout-allow-overflow></canvas>
+        <canvas data-hf-id="hf-fxcv" id="a4-fx-cv" width="1920" height="1080" data-layout-allow-overflow></canvas>
+        <div data-hf-id="hf-dxvz" id="a4-vig"></div>
+
+        <!-- A · what changes -->
+        <div class="scrim scrim-l" id="a4-scrimA"></div>
+        <div data-hf-id="hf-4krj" id="a4-tl">
+          <div data-hf-id="hf-ff18" class="a4-kick" id="a4-tlk">WHAT CHANGES</div>
+          <div data-hf-id="hf-n7v0" class="lab" id="a4-l1" style="top:60px">COMPARABLE RECORD · BEFORE</div>
+          <div data-hf-id="hf-p58s" id="a4-b1"></div>
+          <div data-hf-id="hf-mx0f" id="a4-wall"></div>
+          <div data-hf-id="hf-xxvb" id="a4-wallt">FAIR COMPARISONS STOP</div>
+          <div data-hf-id="hf-q7qc" class="lab" id="a4-l2" style="top:150px;color:var(--ember);font-weight:700">KILN WATCH</div>
+          <div data-hf-id="hf-00qf" id="a4-b2"></div>
+          <div data-hf-id="hf-b4h5" id="a4-tail"></div>
+          <div data-hf-id="hf-5ti5" id="a4-modis"></div>
+          <div data-hf-id="hf-0eep" id="a4-modist">MODIS ENDS</div>
+          <div data-hf-id="hf-2mno" id="a4-axis"></div>
+          <div data-hf-id="hf-cy53" id="a4-ticks"><span data-hf-id="hf-jr6y" style="left:0px">2003</span><span data-hf-id="hf-1yo0" style="left:222px">2007</span><span data-hf-id="hf-oxup" style="left:500px">2012</span><span data-hf-id="hf-530t" style="left:778px">2017</span><span data-hf-id="hf-f9av" style="left:1056px">2022</span><span data-hf-id="hf-0x11" style="left:1321px">TODAY</span><span data-hf-id="hf-wwww" style="left:1500px">2030</span></div>
+          <div data-hf-id="hf-skdn" id="a4-yrsrow"><div data-hf-id="hf-6qzw" id="a4-yrs">14</div><div data-hf-id="hf-wvpu" id="a4-yrsw">years</div></div>
+          <div data-hf-id="hf-c1p6" id="a4-yrsub">of comparable fire history, for any place on Earth</div>
+        </div>
+
+        <!-- B · Bhaluka -->
+        <svg data-hf-id="hf-xnb1" id="a4-lead1"><path data-hf-id="hf-vlr9" id="a4-l1p" d="" fill="none" stroke="#ff7a3d" stroke-width="2" stroke-dasharray="6 6" /></svg>
+        <div data-hf-id="hf-c44h" class="a4-abs" id="a4-box"></div>
+        <div data-hf-id="hf-ogg1" class="a4-abs" id="a4-spark"><b data-hf-id="hf-xujp"></b><i data-hf-id="hf-wt6k"></i></div>
+        <svg data-hf-id="hf-6fw4" class="a4-abs" id="a4-cur" viewBox="0 0 30 36"><path data-hf-id="hf-kdmy" d="M2 2 L2 28 L9 21 L14 33 L19 31 L14 19 L24 19 Z" fill="#fff" stroke="#000" stroke-width="2" stroke-linejoin="round" /></svg>
+        <div data-hf-id="hf-aqq9" id="a4-q">Was anyone <em data-hf-id="hf-4z1j">watching?</em></div>
+        <div data-hf-id="hf-2biy" id="a4-a">The satellites were.</div>
+        <div data-hf-id="hf-x6b9" id="a4-cal">
+          <div data-hf-id="hf-ezdx" class="h">Bhaluka, Mymensingh</div>
+          <div data-hf-id="hf-pfx6" class="hr">AREA YOU DREW</div>
+          <div data-hf-id="hf-pb07" class="l" style="top:100px">NORMAL · 2003–2025</div>
+          <div data-hf-id="hf-gu7x" id="a4-norm"></div>
+          <div data-hf-id="hf-xhhj" id="a4-normt">Bhaluka's normal: no fire</div>
+          <div data-hf-id="hf-ilfs" class="l" style="top:266px">2025 · DAY BY DAY</div>
+          <div data-hf-id="hf-wspi" id="a4-months"></div>
+          <div data-hf-id="hf-07sj" id="a4-grid"></div>
+          <div data-hf-id="hf-qrjj" id="a4-det">VIIRS detections: <b data-hf-id="hf-jmm5">24 &amp; 25 Mar 2025</b></div>
+          <div data-hf-id="hf-plxy" id="a4-unu">25 MAR · FLAGGED UNUSUAL</div>
+          <div data-hf-id="hf-egvp" id="a4-calb"><span data-hf-id="hf-fsok" class="a4-badge"><b data-hf-id="hf-niaw">NASA</b> MODIS + VIIRS · HARMONIZED</span></div>
+        </div>
+
+        <!-- C · users -->
+        <svg data-hf-id="hf-7ov8" id="a4-lead" />
+        <div data-hf-id="hf-bdmv" class="a4-u" id="a4-u1">
+          <div data-hf-id="hf-x50y" class="role">Farm officer</div><div data-hf-id="hf-u1fb" class="pl">NAOGAON</div>
+          <svg data-hf-id="hf-2og7" id="a4-v1" viewBox="0 0 504 262" />
+          <div data-hf-id="hf-83dz" class="cap">Plans around the Boro harvest.</div>
+          <span data-hf-id="hf-ccsx" class="a4-badge"><b data-hf-id="hf-hc2o">NASA</b> VIIRS ACTIVE FIRE</span>
+        </div>
+        <div data-hf-id="hf-0i58" class="a4-u" id="a4-u2">
+          <div data-hf-id="hf-5e2p" class="role">Inspector</div><div data-hf-id="hf-02i6" class="pl">TANGAIL</div>
+          <svg data-hf-id="hf-mvrk" id="a4-v2" viewBox="0 0 504 262" />
+          <div data-hf-id="hf-6863" class="cap">Kiln season runs into the rice's most fragile weeks.</div>
+          <span data-hf-id="hf-n2p8" class="a4-badge"><b data-hf-id="hf-g55l">NASA</b> BLACK MARBLE</span>
+        </div>
+        <div data-hf-id="hf-19t1" class="a4-u" id="a4-u3">
+          <div data-hf-id="hf-tx7a" class="role">Scientist</div><div data-hf-id="hf-ee6r" class="pl">GLOBAL</div>
+          <svg data-hf-id="hf-0enx" id="a4-v3" viewBox="0 0 504 262" />
+          <div data-hf-id="hf-56eb" class="cap">23 years. No fake jump.</div>
+          <span data-hf-id="hf-4aa5" class="a4-badge">MODIS 2003– + VIIRS 2012– · <b data-hf-id="hf-kkyw">HARMONIZED</b></span>
+        </div>
+        <div data-hf-id="hf-pfqq" id="a4-news"><div data-hf-id="hf-tyvd" class="src">THE DAILY STAR · 2026</div><div data-hf-id="hf-5nv1" class="hd">Tangail farmers protest over kiln emissions damaging Boro paddies</div></div>
+
+        <!-- D · scale -->
+        <div data-hf-id="hf-5cif" id="a4-cns"></div>
+        <div data-hf-id="hf-k5c8" class="a4-abs" id="a4-kbox"><i data-hf-id="hf-zeb8"></i><div data-hf-id="hf-aykw" id="a4-kcard"><div data-hf-id="hf-npch" class="k">KURANGANI, INDIA · 11 MARCH 2018</div><div data-hf-id="hf-80f6" class="b">23 trekkers died.</div><div data-hf-id="hf-vnwt" class="s">Tamil Nadu now bans treks 15 Feb – 15 April.</div></div></div>
+        <div data-hf-id="hf-kmjo" id="a4-stats"><div data-hf-id="hf-w4bu"><b data-hf-id="hf-1170" id="a4-n8">8</b> COUNTRIES</div><div data-hf-id="hf-7ocr">ANY AREA</div><div data-hf-id="hf-4rdr">UPDATED <b data-hf-id="hf-43a6">DAILY</b></div><div data-hf-id="hf-yeow"><b data-hf-id="hf-o3jv">FREE</b></div><div data-hf-id="hf-2u57">ENGLISH &amp; BANGLA</div></div>
+        <div data-hf-id="hf-t72e" id="a4-nasa">BUILT ON NASA · <b data-hf-id="hf-rx46">FIRMS</b> · <b data-hf-id="hf-e57b">MODIS</b> · <b data-hf-id="hf-6rlk">VIIRS</b> · <b data-hf-id="hf-1wr9">BLACK MARBLE</b></div>
+        <div data-hf-id="hf-cdzw" id="a4-any">Same method. <span data-hf-id="hf-vua4" style="color:var(--ember)">Anywhere on Earth.</span></div>
+        <div data-hf-id="hf-ryo9" id="a4-kiln"><div data-hf-id="hf-v033" class="a4-kick">NEXT</div><div data-hf-id="hf-fnky" class="n" id="a4-kn">~138,000 kilns</div><div data-hf-id="hf-yqa5" class="s">across South Asia's brick belt</div></div>
+        <div data-hf-id="hf-7k65" id="a4-live"><div data-hf-id="hf-r1lf" class="pill"><i data-hf-id="hf-y7e5"></i>LIVE</div><div data-hf-id="hf-tjzz" class="big">ALL OF SOUTH ASIA</div></div>
+        <div data-hf-id="hf-v54b" id="a4-tag"><i data-hf-id="hf-ylp6"></i>LIVE · ALL OF SOUTH ASIA</div>
+
+        <!-- E · effort -->
+        <div data-hf-id="hf-oldl" id="a4-minis"></div>
+        <div data-hf-id="hf-gtek" id="a4-eff"><div data-hf-id="hf-6ezi" id="a4-effl1">12 MONTHS OF GUESSWORK</div><div data-hf-id="hf-7u1w" id="a4-effl2">→ THE WEEKS THAT MATTER</div><div data-hf-id="hf-ieue" id="a4-cells"></div></div>
+
+        <!-- F · the ask -->
+        <div data-hf-id="hf-6ktb" id="a4-pins"></div>
+        <div data-hf-id="hf-7w8f" id="a4-need"><div data-hf-id="hf-km7w" class="a4-kick">WHAT WE NEED</div><div data-hf-id="hf-0a5w" class="big">Forest and fire services to pilot it.</div></div>
+
+        <!-- G · the ending -->
+        <div data-hf-id="hf-lg0d" id="a4-yr">2003</div>
+        <svg data-hf-id="hf-r78k" id="a4-chart" viewBox="0 0 1200 220" />
+
+        <!-- H · Bhaluka at dusk -->
+        <div data-hf-id="hf-v1ts" id="a4-forest">
+          <svg data-hf-id="hf-cstn" id="a4-fsvg" data-layout-allow-overflow viewBox="0 0 2112 1188" preserveAspectRatio="none" />
+          <div data-hf-id="hf-fl09" id="a4-fcal"><div data-hf-id="hf-k58v" class="t">BHALUKA · <b data-hf-id="hf-21z9">25 MARCH 2025: FLAGGED UNUSUAL</b></div><div data-hf-id="hf-nplu" id="a4-fdays"></div></div>
+          <div id="a4-night"></div>
+        </div>
+
+        <!-- I · title. #a4-montage is the slot for the team montage clip -->
+        <div data-hf-id="hf-jiw3" id="a4-title">
+          <div data-hf-id="hf-b94y" id="a4-montage"></div>
+          <div data-hf-id="hf-aod1" id="a4-one"><div data-hf-id="hf-06hd">One fire record.</div><div data-hf-id="hf-drww" class="e">For any place on Earth.</div></div>
+          <div data-hf-id="hf-hmlp" id="a4-card">
+            <div data-hf-id="hf-cqvu" id="a4-wm"><i data-hf-id="hf-0l8b"></i>KILN WATCH</div>
+            <div data-hf-id="hf-bw70" id="a4-team">TEAM OFF THE BINARY</div>
+            <div data-hf-id="hf-54lx" id="a4-url">aalvee-aarham.github.io/kiln-watch</div>
+            <div data-hf-id="hf-jnam" id="a4-pilot">Pilot it with us: forest and fire services</div>
+          </div>
+        </div>
+
+        <!-- J · final beat -->
+        <div data-hf-id="hf-lz2g" class="a4-abs" id="a4-new"><b data-hf-id="hf-ey49"></b><i data-hf-id="hf-0zjc"></i><div data-hf-id="hf-8vmt" id="a4-newt"><div data-hf-id="hf-8ggm" id="a4-nt1"></div><div data-hf-id="hf-4icl" id="a4-nt2"></div></div></div>
+        <div data-hf-id="hf-ccpt" id="a4-mark"><i data-hf-id="hf-zsm9"></i>KILN WATCH<span data-hf-id="hf-ecf8">/ IMPACT</span></div>
+        <div data-hf-id="hf-tuc4" id="a4-black"></div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, E = window.EARTH, G = window.GEO4, $ = function (id) { return document.getElementById(id); };
+          var tl = gsap.timeline({ paused: true });
+          var cv = $("a4-cv"), fx = $("a4-fx-cv"), fctx = fx.getContext("2d");
+          var P = G.places;
+
+          // Real NASA-imagery globe: camera path lives in assets/earth.js's own SHOT_KEYS/TRACKS
+          // (sized to this act's 74s, opening near Act 3's closing camera state per CONTINUITY.md).
+          // This composition only needs `t` to project lon/lat onto the live render.
+          window.__hf = window.__hf || {};
+          window.__hf.buildReady = window.__hf.buildReady || {};
+          window.__hf.buildReady["earth-textures"] = E.init(cv, "assets/tex/").then(function () { E.render(0); });
+          var A = { proj: function (c, lon, lat) { return E.project(c.t, lon, lat); } };
+          function camAt(t) { return { t: t }; }
+          function at(el, x, y) { el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)"; }
+
+          // ---------- build: Bhaluka card
+          var norm = $("a4-norm"), nb = [], nr = K.rng(11);
+          for (var m = 0; m < 12; m++) { var d = document.createElement("div"); d.style.left = (m * 60.67 + 10) + "px"; norm.appendChild(d); nb.push(18 + nr() * 50); }
+          var MO = "JFMAMJJASOND", mo = $("a4-months"), DIM = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], doy = 0;
+          for (m = 0; m < 12; m++) { var sp = document.createElement("span"); sp.textContent = MO[m]; sp.style.left = (Math.floor((doy + 3) / 7) * 13.74) + "px"; mo.appendChild(sp); doy += DIM[m]; }
+          var grid = $("a4-grid"), cells = [];
+          for (var dd = 0; dd < 365; dd++) {
+            var c = document.createElement("div"), col = Math.floor((dd + 3) / 7), row = (dd + 3) % 7;
+            c.style.left = (col * 13.74) + "px"; c.style.top = (row * 13.74) + "px";
+            grid.appendChild(c); cells.push(c);
+          }
+          var d24 = cells[82], d25 = cells[83];
+          $("a4-unu").style.left = (36 + Math.floor(86 / 7) * 13.74 - 18) + "px";
+
+          // ---------- build: user panels
+          var v1 = $("a4-v1"), v2 = $("a4-v2"), v3 = $("a4-v3");
+          var share = [4, 6, 10, 26, 24, 4, 2, 2, 2, 4, 8, 8], bars1 = [];
+          K.svg("rect", { x: 3 * 42, y: 0, width: 84, height: 220, fill: "#f2b862", opacity: 0.14 }, v1);
+          var boro1 = K.svg("text", { x: 3 * 42 + 6, y: 22, "font-family": "JetBrains Mono", "font-size": 16, "font-weight": 700, fill: "#f2b862", "letter-spacing": "1.5" }, v1); boro1.textContent = "BORO HARVEST";
+          share.forEach(function (s, i) {
+            bars1.push({ el: K.svg("rect", { x: i * 42 + 6, y: 220, width: 30, height: 0, rx: 2, fill: i === 3 || i === 4 ? "#ff7a3d" : "#6b6660" }, v1), h: (s / 26) * 170 });
+            var tx = K.svg("text", { x: i * 42 + 21, y: 248, "text-anchor": "middle", "font-family": "JetBrains Mono", "font-size": 16, fill: "#97948d" }, v1); tx.textContent = MO[i];
+          });
+          K.svg("line", { x1: 0, x2: 504, y1: 220, y2: 220, stroke: "#3a3632", "stroke-width": 2 }, v1);
+          var M2 = "SONDJFMAMJJA";
+          for (m = 0; m < 12; m++) { var t2 = K.svg("text", { x: m * 42 + 21, y: 248, "text-anchor": "middle", "font-family": "JetBrains Mono", "font-size": 16, fill: "#97948d" }, v2); t2.textContent = M2[m]; }
+          K.svg("line", { x1: 0, x2: 504, y1: 220, y2: 220, stroke: "#3a3632", "stroke-width": 2 }, v2);
+          var frag = K.svg("rect", { x: 5 * 42, y: 34, width: 3 * 42, height: 160, fill: "rgba(255,74,72,0.16)", stroke: "#ff4a48", "stroke-width": 2, "stroke-dasharray": "6 5", opacity: 0 }, v2);
+          var fragT = K.svg("text", { x: 5 * 42 + 63, y: 20, "text-anchor": "middle", "font-family": "JetBrains Mono", "font-size": 15, "font-weight": 700, fill: "#ff8a8d", opacity: 0 }, v2); fragT.textContent = "MOST FRAGILE WEEKS";
+          var kT = K.svg("text", { x: 2 * 42, y: 64, "font-family": "JetBrains Mono", "font-size": 15, fill: "#ff9a6a" }, v2); kT.textContent = "KILN SEASON";
+          var kilnB = K.svg("rect", { x: 2 * 42, y: 72, width: 0, height: 30, rx: 3, fill: "#c4572a" }, v2);
+          var bT = K.svg("text", { x: 4 * 42, y: 142, "font-family": "JetBrains Mono", "font-size": 15, fill: "#b9d68a" }, v2); bT.textContent = "BORO RICE";
+          var boroB = K.svg("rect", { x: 4 * 42, y: 150, width: 0, height: 30, rx: 3, fill: "#7fa64f" }, v2);
+          // scientist: 23 harmonized years
+          var yrs = [], ar = K.rng(5);
+          for (var y = 0; y <= 22; y++) yrs.push(100 + 18 * Math.sin(y * 0.9) + 12 * (ar() - 0.5) + y * 0.8);
+          var X3 = function (i) { return 12 + (i / 22) * 480; }, Y3 = function (v) { return 220 - (v / 230) * 200; };
+          var bandD = "", top = [], bot = [];
+          yrs.forEach(function (v, i) { top.push([X3(i), Y3(v * 1.18)]); bot.unshift([X3(i), Y3(v * 0.82)]); });
+          top.concat(bot).forEach(function (q, i) { bandD += (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); });
+          var band3 = K.svg("path", { d: bandD + "Z", fill: "#8fbaff", opacity: 0 }, v3);
+          var rawD = "", hD = "";
+          yrs.forEach(function (v, i) { hD += (i ? "L" : "M") + X3(i).toFixed(1) + " " + Y3(v).toFixed(1); if (i >= 9) rawD += (i > 9 ? "L" : "M") + X3(i).toFixed(1) + " " + Y3(Math.min(225, v * 2.1)).toFixed(1); });
+          var raw3 = K.svg("path", { d: rawD, fill: "none", stroke: "#ff4a48", "stroke-width": 2.5, "stroke-dasharray": "5 6", opacity: 0 }, v3);
+          var rawT = K.svg("text", { x: X3(16), y: 10, "font-family": "JetBrains Mono", "font-size": 15, fill: "#ff8a8d", opacity: 0 }, v3); rawT.textContent = "RAW: FAKE JUMP";
+          var line3 = K.svg("path", { d: hD, fill: "none", stroke: "#ff7a3d", "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round" }, v3);
+          var L3 = line3.getTotalLength(); line3.setAttribute("stroke-dasharray", L3); line3.setAttribute("stroke-dashoffset", L3);
+          K.svg("line", { x1: X3(9), x2: X3(9), y1: 20, y2: 222, stroke: "#6b6660", "stroke-width": 1.5, "stroke-dasharray": "3 4" }, v3);
+          K.svg("line", { x1: 0, x2: 504, y1: 222, y2: 222, stroke: "#3a3632", "stroke-width": 2 }, v3);
+          [["2003", 0], ["2012", 9], ["2025", 22]].forEach(function (a) { var tx = K.svg("text", { x: X3(a[1]), y: 248, "text-anchor": "middle", "font-family": "JetBrains Mono", "font-size": 16, fill: "#97948d" }, v3); tx.textContent = a[0]; });
+          var lead = $("a4-lead"), leads = [0, 1, 2].map(function () {
+            return { p: K.svg("path", { d: "", fill: "none", stroke: "#45403a", "stroke-width": 2 }, lead), d: K.svg("circle", { r: 7, fill: "#ff7a3d" }, lead) };
+          });
+          var anchors = [P.naogaon, P.tangail, [90.35, 23.7]];
+
+          // ---------- build: country labels, minis, pins
+          var cns = G.countries.map(function (cn) { var e = document.createElement("div"); e.className = "a4-abs"; e.innerHTML = '<div class="a4-cn" data-layout-allow-overlap>' + cn.name + "</div>"; $("a4-cns").appendChild(e); return e; });
+          var REG = [[80, 24, [3, 4]], [20, 8, [11, 0, 1]], [24, -11, [6, 7, 8]], [100, 58, [5, 6]], [132, -15, [8, 9]], [102, 18, [1, 2, 3]], [-60, -9, [7, 8]]];
+          var minis = REG.map(function (r) {
+            var e = document.createElement("div"); e.className = "a4-abs a4-mini";
+            var h = "<div>"; for (var i = 0; i < 12; i++) h += "<span" + (r[2].indexOf(i) >= 0 ? ' class="on"' : "") + "></span>"; e.innerHTML = h + "</div>";
+            $("a4-minis").appendChild(e); return e;
+          });
+          var pins = G.pilots.map(function () { var e = document.createElement("div"); e.className = "a4-abs a4-pin"; e.innerHTML = "<i></i><b>PILOT<u></u></b>"; $("a4-pins").appendChild(e); return e; });
+          var ecells = $("a4-cells"), effc = [];
+          for (var w = 0; w < 52; w++) { var ec = document.createElement("div"); ec.style.left = (w * 26.94) + "px"; ecells.appendChild(ec); effc.push(ec); }
+          var HOT = [40, 41, 42, 43];
+
+          // ---------- build: ending chart
+          var ch = $("a4-chart"), XC = function (yr) { return ((yr - 2003) / 27) * 1200; };
+          var gl = [], gr = K.rng(23);
+          for (var yy = 0; yy <= 23; yy++) gl.push(110 + 14 * Math.sin(yy * 0.8) + 10 * (gr() - 0.5));
+          var red = K.svg("g", {}, ch);
+          K.svg("rect", { x: XC(2012) - 14, y: 0, width: 28, height: 150, fill: "#ff4a48", opacity: 0.12 }, red);
+          K.svg("line", { x1: XC(2012), x2: XC(2012), y1: 0, y2: 150, stroke: "#ff4a48", "stroke-width": 3 }, red);
+          var settle = K.svg("circle", { cx: XC(2012), cy: 150 - gl[9] * 0.85, r: 9, fill: "#ff7a3d", opacity: 0 }, ch);
+          var gline = K.svg("path", { d: "", fill: "none", stroke: "#ff7a3d", "stroke-width": 5, "stroke-linecap": "round", "stroke-linejoin": "round" }, ch);
+          var modT = K.svg("rect", { x: 0, y: 166, width: 0, height: 8, rx: 2, fill: "#f2b862" }, ch);
+          var viiT = K.svg("rect", { x: XC(2012), y: 182, width: 0, height: 8, rx: 2, fill: "#8fbaff" }, ch);
+          var modL = K.svg("text", { x: 0, y: 160, "font-family": "JetBrains Mono", "font-size": 16, "font-weight": 700, fill: "#f2b862", "letter-spacing": "2" }, ch); modL.textContent = "MODIS";
+          var viiL = K.svg("text", { x: XC(2012), y: 212, "font-family": "JetBrains Mono", "font-size": 16, "font-weight": 700, fill: "#8fbaff", "letter-spacing": "2" }, ch); viiL.textContent = "VIIRS";
+          var endM = K.svg("line", { x1: XC(2026.9), x2: XC(2026.9), y1: 20, y2: 196, stroke: "#f2b862", "stroke-width": 2, "stroke-dasharray": "4 5", opacity: 0 }, ch);
+          var endT = K.svg("text", { x: XC(2026.9) - 10, y: 14, "text-anchor": "end", "font-family": "JetBrains Mono", "font-size": 16, fill: "#f2b862", opacity: 0, "letter-spacing": "2" }, ch); endT.textContent = "MODIS ENDS";
+          var contT = K.svg("text", { x: 1200, y: 212, "text-anchor": "end", "font-family": "JetBrains Mono", "font-size": 16, "font-weight": 700, fill: "#8fbaff", opacity: 0, "letter-spacing": "2" }, ch); contT.textContent = "VIIRS CONTINUES →";
+          var GY = function (v) { return 150 - v * 0.85; };
+
+          // ---------- build: the forest at dusk (layered silhouettes)
+          var fs = $("a4-fsvg"), fr = K.rng(2025);
+          var defs = K.svg("defs", {}, fs);
+          var sky = K.svg("linearGradient", { id: "a4-sky", x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+          [["0", "#0b1322"], ["0.38", "#262443"], ["0.62", "#7a3f45"], ["0.74", "#d4693c"], ["0.8", "#e98a4a"], ["1", "#2a1a14"]].forEach(function (s) { K.svg("stop", { offset: s[0], "stop-color": s[1] }, sky); });
+          var sunG = K.svg("radialGradient", { id: "a4-sun" }, defs);
+          K.svg("stop", { offset: 0, "stop-color": "#ffd29a", "stop-opacity": 0.9 }, sunG); K.svg("stop", { offset: 1, "stop-color": "#ff8a4a", "stop-opacity": 0 }, sunG);
+          var blur = K.svg("filter", { id: "a4-blur", x: "-50%", y: "-50%", width: "200%", height: "200%" }, defs); K.svg("feGaussianBlur", { stdDeviation: 28 }, blur);
+          var blur2 = K.svg("filter", { id: "a4-blur2", x: "-20%", y: "-20%", width: "140%", height: "140%" }, defs); K.svg("feGaussianBlur", { stdDeviation: 4 }, blur2);
+          K.svg("rect", { x: 0, y: 0, width: 2112, height: 1188, fill: "url(#a4-sky)" }, fs);
+          K.svg("circle", { cx: 1180, cy: 800, r: 420, fill: "url(#a4-sun)" }, fs);
+          function layer(n, col, wmin, wmax, yTop, canopy, filt) {
+            var g = K.svg("g", filt ? { filter: filt } : {}, fs);
+            for (var i = 0; i < n; i++) {
+              var x = fr() * 2112, wv = wmin + fr() * (wmax - wmin), lean = (fr() - 0.5) * wv * 0.6;
+              K.svg("path", { d: "M" + (x - wv / 2) + " 1188 L" + (x - wv * 0.32 + lean) + " " + yTop + " L" + (x + wv * 0.32 + lean) + " " + yTop + " L" + (x + wv / 2) + " 1188Z", fill: col }, g);
+              for (var j = 0; j < canopy; j++) K.svg("ellipse", { cx: x + lean + (fr() - 0.5) * wv * 9, cy: yTop - 30 + (fr() - 0.5) * 180, rx: 60 + fr() * 110, ry: 30 + fr() * 50, fill: col }, g);
+            }
+            return g;
+          }
+          var fFar = layer(46, "#3a2a3c", 8, 16, 260, 3, "url(#a4-blur2)");
+          var hz1 = K.svg("ellipse", { cx: 1056, cy: 880, rx: 1300, ry: 120, fill: "#e8a070", opacity: 0.22, filter: "url(#a4-blur)" }, fs);
+          var fMid = layer(26, "#1c1520", 22, 40, 120, 4);
+          var hz2 = K.svg("ellipse", { cx: 900, cy: 1010, rx: 1400, ry: 90, fill: "#a87a64", opacity: 0.2, filter: "url(#a4-blur)" }, fs);
+          K.svg("rect", { x: 0, y: 1040, width: 2112, height: 148, fill: "#0e0a0b" }, fs);
+          var litter = K.svg("g", {}, fs);
+          for (var li = 0; li < 260; li++) K.svg("ellipse", { cx: fr() * 2112, cy: 1040 + fr() * 140, rx: 3 + fr() * 6, ry: 1.5 + fr() * 2.5, fill: ["#5a3a24", "#6e4a2a", "#3e2a1c"][li % 3], opacity: 0.8 }, litter);
+          var fNear = K.svg("g", {}, fs);
+          [[110, 130], [330, 70], [1860, 110], [2010, 150]].forEach(function (q) { K.svg("path", { d: "M" + (q[0] - q[1] / 2) + " 1188 L" + (q[0] - q[1] * 0.36) + " -10 L" + (q[0] + q[1] * 0.36) + " -10 L" + (q[0] + q[1] / 2) + " 1188Z", fill: "#060405" }, fNear); });
+          var flies = [];
+          for (var fi = 0; fi < 36; fi++) flies.push({ el: K.svg("circle", { r: 1.5 + fr() * 2.2, fill: "#ffd08a" }, fs), x: 200 + fr() * 1700, y: 500 + fr() * 520, ph: fr() * 6.28, sp: 0.25 + fr() * 0.5 });
+          var fdays = $("a4-fdays");
+          for (dd = 0; dd < 365; dd++) { var fd = document.createElement("div"); fd.style.left = (dd * 3) + "px"; if (dd === 83) { fd.style.background = "#ff7a3d"; fd.style.width = "4px"; fd.style.boxShadow = "0 0 16px 4px rgba(255,122,61,0.9)"; fd.style.height = "34px"; fd.style.top = "-4px"; } fdays.appendChild(fd); }
+
+          // ---------- the frame painter. EARTH.render(t) draws the real imagery (land, sphere,
+          // atmosphere, stars, night lights -- all baked into the shader now); this composition
+          // only overlays what GEO4 knows that the shader doesn't: which country is "lit" (South
+          // Asia lighting up country-by-country, section D), and the fire/kiln glow dots.
+          var ZERO = [0, 0, 0, 0, 0, 0, 0, 0];
+          K.drive(tl, 74, function (t) {
+            var c = camAt(t);
+            E.render(t);
+            fctx.clearRect(0, 0, 1920, 1080);
+
+            // country-by-country lighting (D)
+            var lit = ZERO.slice();
+            for (var k = 0; k < 8; k++) {
+              var on = K.out(K.p(t, 30.7 + k * 0.28, 31.0 + k * 0.28));
+              lit[k] = on * (1 - 0.7 * K.p(t, 37.2, 38.2)) * (1 - K.p(t, 40.2, 41.2));
+            }
+            var fSA = K.p(t, 29.6, 31.3) * (1 - K.p(t, 39.4, 40.4)); // only draw while South Asia is the subject
+            if (fSA > 0) {
+              fctx.lineJoin = "round";
+              G.countries.forEach(function (cn, i) {
+                var on = lit[i];
+                fctx.beginPath();
+                cn.rings.forEach(function (r) { K.ring(fctx, t, r); });
+                fctx.lineWidth = on > 0 ? 2.2 : 1.1;
+                fctx.strokeStyle = on > 0 ? "rgba(255,160,90," + ((0.35 + 0.55 * on) * fSA).toFixed(3) + ")" : "rgba(243,238,228," + (0.16 * fSA).toFixed(3) + ")";
+                fctx.stroke();
+                if (on > 0) { fctx.fillStyle = "rgba(255,122,61," + (0.06 * on * fSA).toFixed(3) + ")"; fctx.fill(); }
+              });
+            }
+            // fires: a faint ambient scatter during D/E, then the sweeping seasonal flicker during the G replay
+            var sea = (t - 50.6) / 6.0 * 23 * 12; // months since Jan 2003 during the replay
+            var faint = K.p(t, 35.4, 36.6) * (1 - K.p(t, 45.4, 46.4)) * (1 - 0.65 * K.p(t, 37.4, 38.4) * (1 - K.p(t, 40.2, 41.2)));
+            if (faint > 0) K.glows(fctx, t, G.fires.ll, function () { return 7 * faint; });
+            if (t > 50.4 && t < 58.8) {
+              var vis = K.p(t, 50.4, 51.0) * (1 - K.p(t, 58.0, 58.8));
+              K.glows(fctx, t, G.fires.ll, function (i) {
+                var dm = Math.abs(((sea % 12) + 12) % 12 - G.fires.m[i]); dm = Math.min(dm, 12 - dm);
+                return vis * 13 * Math.exp(-dm * dm / 2.2) * (0.6 + 0.4 * Math.sin(i * 12.9898 + Math.floor(sea / 12) * 3.1));
+              });
+            }
+            // kilns: reveal across the brick belt as the counter in D climbs
+            var kv = K.p(t, 37.4, 39.4) * (1 - K.p(t, 40.4, 41.4)), kn = G.kilns.ll.length / 2;
+            if (kv > 0) K.glows(fctx, t, G.kilns.ll, function (i) { return i / kn < kv ? 7 : 0; });
+
+            // A · counter + spark
+            $("a4-yrs").textContent = Math.round(14 + 9 * K.inOut(K.p(t, 3.0, 4.6)));
+            var bh = A.proj(c, P.bhaluka[0], P.bhaluka[1]);
+            var sp0 = K.inOut(K.p(t, 7.9, 9.4)), sx = K.lerp(210 + 1321, bh[0], sp0), sy = K.lerp(140 + 193, bh[1], sp0) - Math.sin(sp0 * Math.PI) * 120 * (1 - K.p(t, 9.4, 9.5));
+            at($("a4-spark"), sx, sy);
+            $("a4-spark").style.opacity = K.p(t, 7.8, 8.0) * (1 - K.p(t, 17.4, 17.9));
+            $("a4-spark").querySelector("b").style.transform = "scale(" + (1 + 0.6 * ((t * 1.1) % 1)).toFixed(3) + ")";
+            $("a4-spark").querySelector("b").style.opacity = (1 - ((t * 1.1) % 1)).toFixed(3);
+
+            // B · box, cursor, leader
+            var b0 = A.proj(c, 90.0, 24.75), b1 = A.proj(c, 90.75, 24.0);
+            var dr = K.inOut(K.p(t, 10.6, 11.3));
+            var bx1 = K.lerp(b0[0], b1[0], dr), by1 = K.lerp(b0[1], b1[1], dr);
+            var box = $("a4-box");
+            at(box, b0[0], b0[1]); box.style.width = Math.max(0, bx1 - b0[0]).toFixed(1) + "px"; box.style.height = Math.max(0, by1 - b0[1]).toFixed(1) + "px";
+            box.style.opacity = K.p(t, 10.6, 10.7) * (1 - K.p(t, 17.4, 17.9));
+            var cur = $("a4-cur"), cin = K.p(t, 10.0, 10.6);
+            at(cur, K.lerp(b0[0] - 140, b0[0], K.out(cin)) + (bx1 - b0[0]) - 4, K.lerp(b0[1] + 120, b0[1], K.out(cin)) + (by1 - b0[1]) - 3);
+            cur.style.opacity = K.p(t, 10.0, 10.2) * (1 - K.p(t, 11.6, 11.9));
+            var lp = K.p(t, 11.4, 11.8) * (1 - K.p(t, 17.2, 17.6));
+            $("a4-l1p").setAttribute("d", lp > 0 ? "M" + b1[0].toFixed(1) + " " + K.lerp(b0[1], b1[1], 0.5).toFixed(1) + " L" + K.lerp(b1[0], 1020, lp).toFixed(1) + " " + K.lerp(K.lerp(b0[1], b1[1], 0.5), 420, lp).toFixed(1) : "");
+            // card internals
+            var snap = K.p(t, 12.2, 12.6);
+            norm.childNodes.forEach(function (el, i) { el.style.height = K.lerp(nb[i], i === 2 ? 4 : 2, K.out(snap)).toFixed(1) + "px"; });
+            var hit = K.p(t, 13.2, 13.4), glowd = K.p(t, 14.2, 14.5), hold = K.p(t, 15.7, 16.2);
+            cells.forEach(function (el, i) { el.style.opacity = i === 83 ? 1 : (1 - 0.6 * hold).toFixed(3); });
+            d24.style.background = hit > 0 ? "rgba(255,140,80," + (0.4 + 0.5 * hit * (1 - 0.5 * hold)).toFixed(2) + ")" : "#1c1a17";
+            d25.style.background = hit > 0 ? "#ff7a3d" : "#1c1a17";
+            var pulse = 0.5 + 0.5 * Math.sin(t * 5);
+            d25.style.boxShadow = glowd > 0 ? "0 0 " + (8 + 14 * glowd + 8 * pulse * glowd).toFixed(0) + "px " + (3 + 4 * glowd).toFixed(0) + "px rgba(255,122,61,0.9)" : "none";
+            d25.style.transform = "scale(" + (1 + 0.5 * glowd).toFixed(3) + ")";
+
+            // C · leaders from the map to each user
+            leads.forEach(function (l, i) {
+              var a = A.proj(c, anchors[i][0], anchors[i][1]), lit = i === 0 ? K.p(t, 19.0, 19.3) * (1 - K.p(t, 22.5, 22.8)) : i === 1 ? K.p(t, 22.6, 22.9) * (1 - K.p(t, 26.6, 26.9)) : K.p(t, 26.7, 27.0);
+              var vis = K.p(t, 18.4, 18.9) * (1 - K.p(t, 29.4, 29.8)), px = [340, 960, 1580][i];
+              l.p.setAttribute("d", "M" + a[0].toFixed(1) + " " + a[1].toFixed(1) + " C" + a[0].toFixed(1) + " " + (a[1] + 90).toFixed(1) + " " + px + " " + 380 + " " + px + " 470");
+              l.p.setAttribute("opacity", (vis * (0.35 + 0.65 * lit)).toFixed(3));
+              l.p.setAttribute("stroke", lit > 0.5 ? "#ff7a3d" : "#45403a");
+              l.d.setAttribute("cx", a[0].toFixed(1)); l.d.setAttribute("cy", a[1].toFixed(1)); l.d.setAttribute("opacity", vis.toFixed(3));
+            });
+            var g1 = K.out(K.p(t, 19.1, 20.3));
+            bars1.forEach(function (b, i) { var hh = b.h * K.out(K.p(g1 * 12, i * 0.5, i * 0.5 + 3)); b.el.setAttribute("y", (220 - hh).toFixed(1)); b.el.setAttribute("height", hh.toFixed(1)); });
+            kilnB.setAttribute("width", (6 * 42 * K.inOut(K.p(t, 22.8, 23.6))).toFixed(1));
+            boroB.setAttribute("width", (5 * 42 * K.inOut(K.p(t, 23.2, 24.0))).toFixed(1));
+            frag.setAttribute("opacity", K.p(t, 24.1, 24.5)); fragT.setAttribute("opacity", K.p(t, 24.1, 24.5));
+            band3.setAttribute("opacity", 0.22 * K.p(t, 27.6, 28.2));
+            line3.setAttribute("stroke-dashoffset", (L3 * (1 - K.inOut(K.p(t, 26.9, 28.0)))).toFixed(1));
+            var rawv = K.p(t, 27.0, 27.3) * (1 - 0.75 * K.p(t, 28.0, 28.5));
+            raw3.setAttribute("opacity", rawv); rawT.setAttribute("opacity", rawv);
+
+            // D · country labels, Kurangani
+            G.countries.forEach(function (cn, i) {
+              var q = A.proj(c, cn.label[0], cn.label[1]);
+              at(cns[i], q[0], q[1]); cns[i].style.opacity = (K.p(t, 30.8 + i * 0.28, 31.1 + i * 0.28) * (1 - K.p(t, 33.0, 33.4))).toFixed(3);
+            });
+            var kq = A.proj(c, P.kurangani[0], P.kurangani[1]);
+            at($("a4-kbox"), kq[0], kq[1]);
+            $("a4-kn").textContent = "~" + (Math.round(138 * K.out(K.p(t, 37.6, 39.4))) * 1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " kilns";
+
+            // E · minis on fire regions
+            REG.forEach(function (r, i) {
+              var q = A.proj(c, r[0], r[1]);
+              at(minis[i], q[0], q[1]);
+              minis[i].style.opacity = (K.p(q[2], 0.15, 0.4) * K.p(t, 43.0 + i * 0.12, 43.3 + i * 0.12) * (1 - K.p(t, 45.6, 46.2))).toFixed(3);
+            });
+            effc.forEach(function (el, i) {
+              var hot = HOT.indexOf(i) >= 0, guess = K.p(t, 40.2, 40.4) * (1 - K.p(t, 41.6, 42.2));
+              var flick = 0.35 + 0.65 * Math.abs(Math.sin(t * 7 + i * 1.7));
+              el.style.background = hot && t > 41.6 ? "#ff7a3d" : "rgb(" + Math.round(39 + 40 * flick * guess) + "," + Math.round(49 + 44 * flick * guess) + "," + Math.round(66 + 50 * flick * guess) + ")";
+              el.style.boxShadow = hot && t > 41.6 ? "0 0 18px rgba(255,122,61,0.8)" : "none";
+              el.style.opacity = hot ? 1 : (1 - K.p(t, 41.7 + (i % 7) * 0.06, 42.3 + (i % 7) * 0.06)).toFixed(3);
+              var mv = K.inOut(K.p(t, 42.3, 43.1));
+              el.style.transform = hot ? "translateX(" + (-418 * mv).toFixed(1) + "px) scaleY(" + (1 + 0.25 * mv).toFixed(3) + ")" : "none";
+            });
+
+            // F · pilot pins
+            G.pilots.forEach(function (pp, i) {
+              var q = A.proj(c, pp[0], pp[1]);
+              at(pins[i], q[0], q[1]);
+              pins[i].querySelector("i").style.transform = "scale(" + (1 + 0.35 * Math.sin(t * 3 + i)).toFixed(3) + ")";
+            });
+
+            // G · year + chart
+            var yr = 2003 + 23.8 * K.p(t, 50.6, 56.6);
+            $("a4-yr").textContent = Math.floor(yr);
+            var gd = "";
+            for (var gi = 0; gi <= 23 && 2003 + gi <= yr; gi++) gd += (gi ? "L" : "M") + XC(2003 + gi).toFixed(1) + " " + GY(gl[gi]).toFixed(1);
+            if (yr < 2026.8 && Math.floor(yr - 2003) < 23) { var fr0 = yr - Math.floor(yr), g0 = Math.floor(yr - 2003); gd += "L" + XC(yr).toFixed(1) + " " + GY(K.lerp(gl[g0], gl[g0 + 1], fr0)).toFixed(1); }
+            else gd += "L" + XC(Math.min(yr, 2026.8)).toFixed(1) + " " + GY(gl[23]).toFixed(1);
+            var gEnd = K.lerp(2026.8, 2030, K.inOut(K.p(t, 57.0, 58.0)));
+            if (gEnd > 2026.85) gd += "L" + XC(gEnd).toFixed(1) + " " + GY(gl[23] + 4 * Math.sin((gEnd - 2026.8) * 2)).toFixed(1);
+            gline.setAttribute("d", gd);
+            var at12 = K.p(yr, 2011.8, 2012.6);
+            red.setAttribute("opacity", ((1 - at12) * (0.5 + 0.3 * Math.sin(t * 4))).toFixed(3));
+            settle.setAttribute("opacity", at12); settle.setAttribute("r", (9 + 10 * (1 - at12)).toFixed(1));
+            modT.setAttribute("width", Math.max(0, XC(Math.min(yr, 2026.9))).toFixed(1));
+            var modOff = K.p(t, 56.9, 57.6);
+            modT.setAttribute("opacity", 1 - 0.8 * modOff); modL.setAttribute("opacity", 1 - modOff);
+            endM.setAttribute("opacity", K.p(t, 56.4, 56.8)); endT.setAttribute("opacity", K.p(t, 56.4, 56.8));
+            var vEnd = yr < 2026.8 ? yr : K.lerp(2026.8, 2030, K.inOut(K.p(t, 57.0, 58.0)));
+            viiT.setAttribute("width", Math.max(0, XC(vEnd) - XC(2012)).toFixed(1));
+            viiL.setAttribute("opacity", K.p(yr, 2012, 2012.5)); contT.setAttribute("opacity", K.p(t, 57.4, 57.9));
+
+            // H · forest life
+            if (t > 59.4 && t < 70.2) {
+              var ft = t - 59.4;
+              fs.style.transform = "scale(" + (1.0 + 0.012 * ft).toFixed(4) + ")";
+              fFar.setAttribute("transform", "translate(" + (-ft * 2).toFixed(1) + " 0)");
+              fNear.setAttribute("transform", "translate(" + (ft * 3).toFixed(1) + " 0)");
+              hz1.setAttribute("cx", (1056 + Math.sin(ft * 0.3) * 120).toFixed(1));
+              hz2.setAttribute("cx", (900 - ft * 14).toFixed(1));
+              flies.forEach(function (f) {
+                f.el.setAttribute("cx", (f.x + Math.sin(ft * f.sp + f.ph) * 30).toFixed(1));
+                f.el.setAttribute("cy", (f.y - ft * 10 * f.sp + Math.cos(ft * f.sp * 1.3 + f.ph) * 14).toFixed(1));
+                f.el.setAttribute("opacity", (0.25 + 0.75 * Math.pow(0.5 + 0.5 * Math.sin(ft * 2.2 * f.sp + f.ph * 3), 3)).toFixed(3));
+              });
+            }
+
+            // J · one new fire
+            var nq = A.proj(c, P.bhaluka[0], P.bhaluka[1]);
+            at($("a4-new"), nq[0], nq[1]);
+            var rp = K.p(t, 72.0, 73.4);
+            $("a4-new").querySelector("b").style.transform = "scale(" + (0.3 + 1.6 * K.out(rp)).toFixed(3) + ")";
+            $("a4-new").querySelector("b").style.opacity = (K.p(t, 72.0, 72.1) * (1 - rp)).toFixed(3);
+            var s1 = "06:42 · DETECTED THIS MORNING", s2 = "ALREADY ON THE CALENDAR";
+            $("a4-nt1").textContent = s1.slice(0, Math.round(s1.length * K.p(t, 72.2, 72.8)));
+            $("a4-nt2").textContent = s2.slice(0, Math.round(s2.length * K.p(t, 72.9, 73.4)));
+          });
+
+          // ---------- A · what changes
+          tl.fromTo("#a4-mark", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.1);
+          tl.fromTo("#a4-tlk", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+          tl.fromTo("#a4-axis", { scaleX: 0 }, { scaleX: 1, duration: 1.0, ease: "power2.inOut" }, 0.3);
+          tl.fromTo("#a4-ticks span", { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.08 }, 0.6);
+          tl.fromTo("#a4-l1", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.8);
+          tl.fromTo("#a4-b1", { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "power3.out" }, 1.0);
+          tl.fromTo("#a4-wall", { opacity: 0, scaleY: 0 }, { opacity: 1, scaleY: 1, duration: 0.3, ease: "back.out(2)" }, 1.9);
+          tl.fromTo("#a4-wallt", { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.4 }, 2.0);
+          tl.fromTo("#a4-modis, #a4-modist", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.6);
+          tl.fromTo("#a4-l2", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 2.6);
+          tl.fromTo("#a4-b2", { opacity: 0, scaleX: 821 / 1321 }, { opacity: 1, scaleX: 821 / 1321, duration: 0.4 }, 2.6);
+          tl.to("#a4-b2", { scaleX: 1, duration: 1.6, ease: "power2.inOut" }, 3.0);
+          tl.to("#a4-b1, #a4-wall, #a4-wallt, #a4-l1", { opacity: 0.3, duration: 0.6 }, 3.6);
+          tl.fromTo("#a4-yrsrow", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 2.9);
+          tl.fromTo("#a4-tail", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "power2.out" }, 5.0);
+          tl.to("#a4-modist", { color: "#f2b862", opacity: 0.5, duration: 0.4 }, 5.6);
+          tl.fromTo("#a4-yrsub", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 5.4);
+          tl.fromTo("#a4-scrimA", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
+          tl.to("#a4-tl", { opacity: 0, y: -50, duration: 0.6, ease: "power2.in" }, 7.8);
+          tl.to("#a4-scrimA", { opacity: 0, duration: 0.6, ease: "power2.in" }, 7.8);
+
+          // ---------- B · Bhaluka
+          tl.fromTo("#a4-q", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 9.1);
+          tl.to("#a4-q", { opacity: 0.32, duration: 0.5 }, 10.7);
+          tl.fromTo("#a4-a", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 10.8);
+          tl.fromTo("#a4-cal", { clipPath: "inset(0% 100% 0% 0%)", opacity: 0 }, { clipPath: "inset(0% 0% 0% 0%)", opacity: 1, duration: 0.6, ease: "power3.out" }, 11.7);
+          tl.fromTo("#a4-normt", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 12.5);
+          tl.fromTo("#a4-det", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 }, 13.3);
+          tl.fromTo("#a4-unu", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.2)" }, 14.3);
+          tl.fromTo("#a4-calb", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 12.8);
+          tl.to("#a4-cal .h, #a4-cal .hr, #a4-cal .l, #a4-norm, #a4-normt, #a4-months, #a4-det, #a4-calb", { opacity: 0.3, duration: 0.5 }, 15.7);
+          tl.to("#a4-cal", { scale: 1.03, transformOrigin: "30% 60%", duration: 1.6, ease: "sine.inOut" }, 15.6);
+          tl.to("#a4-q, #a4-a", { opacity: 0, duration: 0.5 }, 17.0);
+          tl.to("#a4-cal", { clipPath: "inset(0% 100% 0% 0%)", opacity: 0, duration: 0.5, ease: "power2.in" }, 17.1);
+
+          // ---------- C · users
+          ["#a4-u1", "#a4-u2", "#a4-u3"].forEach(function (s, i) {
+            tl.fromTo(s, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 18.3 + i * 0.1);
+            tl.fromTo(s + " > *", { opacity: 0.35 }, { opacity: 0.35, duration: 0.01 }, 18.3);
+          });
+          [[19.0, 22.5], [22.6, 26.6], [26.7, 29.4]].forEach(function (w, i) {
+            var s = "#a4-u" + (i + 1);
+            tl.to(s, { borderColor: "#ff7a3d", scale: 1.02, duration: 0.3, ease: "power2.out" }, w[0]);
+            tl.to(s + " > *", { opacity: 1, duration: 0.3 }, w[0]);
+            if (i < 2) { tl.to(s, { borderColor: "#332f2a", scale: 1, duration: 0.3 }, w[1]); tl.to(s + " > *", { opacity: 0.35, duration: 0.3 }, w[1]); }
+          });
+          tl.fromTo("#a4-news", { opacity: 0, scale: 0.85, rotation: -4 }, { opacity: 1, scale: 1, rotation: -1.5, duration: 0.35, ease: "back.out(1.8)" }, 23.9);
+          tl.to("#a4-news", { opacity: 0, y: -20, duration: 0.3 }, 25.9);
+          // collapse each panel back into its place on the map
+          var cEnd = camAt(29.6);
+          ["#a4-u1", "#a4-u2", "#a4-u3"].forEach(function (s, i) {
+            var a = A.proj(cEnd, anchors[i][0], anchors[i][1]), cx = [340, 960, 1580][i];
+            tl.to(s, { x: a[0] - cx, y: a[1] - 740, scale: 0.05, opacity: 0, duration: 0.6, ease: "power3.in" }, 29.4 + i * 0.05);
+          });
+
+          // ---------- D · scale
+          tl.fromTo("#a4-live", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 30.6);
+          tl.to("#a4-live", { opacity: 0, scale: 0.18, duration: 0.5, ease: "power3.in" }, 32.6);
+          tl.fromTo("#a4-tag", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 33.0);
+          tl.to("#a4-tag", { opacity: 0, duration: 0.4 }, 45.6);
+          tl.fromTo("#a4-kbox i", { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, 33.1);
+          tl.fromTo("#a4-kcard", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 33.4);
+          tl.to("#a4-kbox", { opacity: 0, duration: 0.4 }, 35.5);
+          tl.fromTo("#a4-stats div", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.12, ease: "power3.out" }, 33.6);
+          tl.fromTo("#a4-nasa", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 34.3);
+          tl.to("#a4-stats, #a4-nasa", { opacity: 0, duration: 0.5 }, 36.8);
+          tl.fromTo("#a4-any", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 35.4);
+          tl.to("#a4-any", { opacity: 0, duration: 0.4 }, 37.4);
+          tl.fromTo("#a4-kiln", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 37.5);
+          tl.to("#a4-kiln", { opacity: 0, duration: 0.4 }, 40.4);
+
+          // ---------- E · effort
+          tl.fromTo("#a4-eff", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 40.2);
+          tl.fromTo("#a4-effl1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 40.2);
+          tl.to("#a4-effl1", { opacity: 0, duration: 0.3 }, 41.9);
+          tl.fromTo("#a4-effl2", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 }, 42.1);
+          tl.to("#a4-eff", { opacity: 0, duration: 0.6 }, 45.3);
+
+          // ---------- F · the ask
+          tl.fromTo("#a4-pins .a4-pin", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, stagger: 0.08, ease: "back.out(2)" }, 47.0);
+          tl.to("#a4-pins", { opacity: 0, duration: 0.5 }, 49.8);
+          tl.fromTo("#a4-need .a4-kick", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 46.6);
+          tl.fromTo("#a4-need .big", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 46.9);
+          tl.to("#a4-need", { opacity: 0, duration: 0.5 }, 49.8);
+
+          // ---------- G · the ending
+          tl.fromTo("#a4-yr", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 50.5);
+          tl.fromTo("#a4-chart", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 50.5);
+          tl.to("#a4-yr, #a4-chart", { opacity: 0, duration: 0.6 }, 58.0);
+          tl.to("#a4-mark", { opacity: 0, duration: 0.5 }, 58.2);
+          // the live-Earth canvases hide under the forest/title card and reappear behind J's black flash
+          tl.to("#a4-cv, #a4-fx-cv, #a4-vig", { opacity: 0, duration: 0.6 }, 59.2);
+
+          // ---------- H · Bhaluka at dusk
+          tl.fromTo("#a4-forest", { opacity: 0 }, { opacity: 1, duration: 0.9, ease: "sine.inOut" }, 59.7);
+          tl.fromTo("#a4-fcal", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 61.0);
+          tl.to("#a4-fcal", { opacity: 0, duration: 0.6 }, 63.6);
+          tl.fromTo("#a4-night", { opacity: 0 }, { opacity: 0.8, duration: 1.0, ease: "sine.inOut" }, 63.5);
+
+          // ---------- I · title
+          tl.fromTo("#a4-one div:nth-child(1)", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 64.3);
+          tl.fromTo("#a4-one div:nth-child(2)", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 65.1);
+          tl.fromTo("#a4-wm", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 1.2, ease: "power3.out" }, 66.3);
+          tl.fromTo("#a4-team, #a4-url, #a4-pilot", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.25, ease: "power2.out" }, 66.9);
+          tl.to("#a4-title, #a4-forest", { opacity: 0, duration: 0.5 }, 69.5);
+
+          // ---------- J · black, then one new fire, then cut
+          tl.fromTo("#a4-black", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 70.0);
+          tl.set("#a4-cv, #a4-fx-cv, #a4-vig", { opacity: 1 }, 70.0);
+          tl.to("#a4-black", { opacity: 0, duration: 0.6 }, 71.0);
+          tl.fromTo("#a4-new", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 72.0);
+          tl.fromTo("#a4-new i", { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(3)" }, 72.0);
+          tl.to("#a4-black", { opacity: 1, duration: 0.01 }, 73.9);
+
+          window.__timelines["act4"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

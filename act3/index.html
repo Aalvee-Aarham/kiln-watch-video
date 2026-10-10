@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Kiln Watch · Act 3 · Solution</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="assets/geo.js"></script>
+    <script src="assets/geo4.js"></script>
+    <script src="assets/kit.js"></script>
+    <script src="assets/earth.js"></script>
+    <style>
+      @font-face { font-family: "Instrument Serif"; src: url("assets/fonts/serif.woff2") format("woff2"); font-style: normal; font-weight: 400; }
+      @font-face { font-family: "Instrument Serif"; src: url("assets/fonts/serif-italic.woff2") format("woff2"); font-style: italic; font-weight: 400; }
+      @font-face { font-family: "Instrument Sans"; src: url("assets/fonts/sans.woff2") format("woff2"); font-style: normal; font-weight: 400 700; }
+      :root {
+        --bg: #000;
+        --ink: #f3eee4;
+        --dim: rgba(243, 238, 228, 0.62);
+        --faint: rgba(243, 238, 228, 0.32);
+        --hair: rgba(243, 238, 228, 0.18);
+        --modis: #f2b862;
+        --viirs: #8fbaff;
+        --ember: #ff7a3d;
+        --alarm: #ff4a48;
+        --serif: "Instrument Serif", serif;
+        --sans: "Instrument Sans", sans-serif;
+        --mono: "JetBrains Mono", monospace;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; color: var(--ink); font-family: var(--sans); }
+      #root > div[data-composition-src] { position: absolute; inset: 0; }
+      /* shared type system for every scene */
+      .kick { font-family: var(--sans); font-weight: 600; font-size: 16px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--ember); white-space: nowrap; }
+      .lab { font-family: var(--sans); font-weight: 500; font-size: 15px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+      .lab b { color: var(--ink); font-weight: 600; }
+      .serif { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; color: var(--ink); text-shadow: 0 6px 50px rgba(0, 0, 0, 0.6); white-space: nowrap; }
+      .serif i { font-style: italic; }
+      .mono { font-family: var(--mono); font-size: 15px; color: var(--dim); white-space: nowrap; }
+      .scrim { position: absolute; inset: 0; pointer-events: none; }
+      .scrim-l { background: linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.42) 34%, rgba(0, 0, 0, 0) 58%); }
+      .scrim-r { background: linear-gradient(270deg, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.62) 40%, rgba(0, 0, 0, 0) 66%); }
+      .rule { display: inline-block; width: 48px; height: 1px; background: var(--hair); vertical-align: middle; }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-1krc" id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="77">
+      <div id="el-earth" data-composition-id="earth" data-composition-src="compositions/earth.html" data-start="0" data-duration="77" data-track-index="0" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-6kjn" id="el-s1" data-composition-id="s1-clue" data-composition-src="compositions/s1-clue.html" data-start="0" data-duration="10" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-53wg" id="el-s2" data-composition-id="s2-fix" data-composition-src="compositions/s2-fix.html" data-start="10" data-duration="15" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-ctiz" id="el-s3" data-composition-id="s3-proof" data-composition-src="compositions/s3-proof.html" data-start="25" data-duration="13" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-2w5v" id="el-s4" data-composition-id="s4-crops" data-composition-src="compositions/s4-crops.html" data-start="38" data-duration="9" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-2op1" id="el-s5" data-composition-id="s5-kilns" data-composition-src="compositions/s5-kilns.html" data-start="47" data-duration="11" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-734o" id="el-s6" data-composition-id="s6-demo" data-composition-src="compositions/s6-demo.html" data-start="58" data-duration="19" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="el-grade" data-composition-id="grade" data-composition-src="compositions/grade.html" data-start="0" data-duration="77" data-track-index="5" data-width="1920" data-height="1080"></div>
+      <audio id="el-score" src="assets/score.wav" data-start="0" data-duration="77" data-track-index="10" data-volume="1"></audio>
+    </div>
+    <script>
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

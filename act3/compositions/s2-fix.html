@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #s2-svg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #s2-steps { position: absolute; left: 1080px; top: 156px; display: flex; align-items: center; gap: 18px; }
+        .s2-step { text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9); display: flex; align-items: baseline; gap: 10px; font-family: var(--sans); font-weight: 600; font-size: 15px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--faint); }
+        .s2-step i { font-family: var(--serif); font-size: 26px; letter-spacing: 0; text-transform: none; }
+        .s2-panel { position: absolute; left: 1080px; top: 236px; width: 760px; height: 700px; }
+        /* P1: one sensor pixel, magnified from the real image */
+        #s2-chip1 { position: absolute; left: 0; top: 0; }
+        #s2-px { position: absolute; left: 0; top: 74px; width: 330px; height: 330px; overflow: hidden; background-image: url("assets/tex/rday.jpg"); image-rendering: pixelated; filter: saturate(0.9) brightness(0.8); }
+        #s2-pxsvg { position: absolute; left: 0; top: 74px; width: 330px; height: 330px; overflow: visible; }
+        #s2-mlab { position: absolute; left: 0; top: 426px; color: var(--modis); }
+        #s2-vlab { position: absolute; left: 0; top: 456px; color: var(--viirs); }
+        #s2-eq { position: absolute; left: 400px; top: 90px; }
+        .s2-n { font-size: 104px; line-height: 1; }
+        .s2-eqlab { margin: 6px 0 34px; }
+        /* P2: the exchange board */
+        #s2-p2 { position: absolute; inset: 0; perspective: 1600px; }
+        #s2-stage { position: absolute; left: 470px; top: 212px; width: 980px; transform-style: preserve-3d; }
+        #s2-chip2 { margin-bottom: 26px; }
+        .s2-head { display: flex; margin-bottom: 12px; }
+        .s2-row { display: flex; gap: 4px; margin-bottom: 9px; position: relative; }
+        .s2-cell { position: relative; width: 34px; height: 52px; border-radius: 4px; background: #07080a; box-shadow: 0 10px 18px rgba(0, 0, 0, 0.6); perspective: 300px; }
+        .s2-face { position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; background: linear-gradient(180deg, #1d2026 0%, #15171c 100%); }
+        .s2-top, .s2-la { top: 0; border-radius: 4px 4px 0 0; }
+        .s2-bot, .s2-lb { top: 50%; border-radius: 0 0 4px 4px; background: linear-gradient(180deg, #121418 0%, #1a1d22 100%); }
+        .s2-la { transform-origin: 50% 100%; z-index: 3; backface-visibility: hidden; }
+        .s2-lb { transform-origin: 50% 0%; z-index: 3; backface-visibility: hidden; }
+        .s2-g { position: absolute; left: 0; width: 100%; height: 52px; line-height: 52px; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 30px; color: #f3eee4; white-space: pre; }
+        .s2-bot .s2-g, .s2-lb .s2-g { top: -26px; }
+        .s2-seam { position: absolute; left: 0; top: 50%; width: 100%; height: 2px; margin-top: -1px; background: #000; z-index: 4; }
+        #s2-hl { position: absolute; left: -14px; top: 0; width: 978px; height: 70px; border: 1.5px solid var(--ember); border-radius: 6px; box-shadow: 0 0 40px rgba(255, 122, 61, 0.35), inset 0 0 30px rgba(255, 122, 61, 0.12); }
+        #s2-rate { position: absolute; left: 0; right: 0; top: 760px; text-align: center; font-size: 104px; line-height: 1; }
+        #s2-rate .v { color: var(--viirs); }
+        #s2-rate .m { color: var(--modis); }
+        #s2-rate .a { color: var(--dim); font-family: var(--sans); font-weight: 300; font-size: 80px; }
+        /* P3: clouds */
+        #s2-chip3 { position: absolute; left: 0; top: 0; }
+        #s2-clab { position: absolute; left: 0; top: 112px; }
+        #s2-pct { position: absolute; left: -8px; top: 140px; font-size: 230px; line-height: 1; font-variant-numeric: tabular-nums; }
+        #s2-pctbar { position: absolute; left: 0; top: 400px; width: 640px; height: 2px; background: var(--hair); }
+        #s2-pctfill { display: block; width: 100%; height: 100%; background: var(--ember); box-shadow: 0 0 14px var(--ember); transform-origin: 0 50%; }
+        #s2-ccap { position: absolute; left: 0; top: 430px; color: var(--ink); }
+      </style>
+      <div id="s2-root" data-composition-id="s2-fix" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div class="scrim scrim-r" id="s2-scrim"></div>
+        <svg id="s2-svg" viewBox="0 0 1920 1080">
+          <defs>
+            <clipPath id="s2-clip"><path id="s2-clipp" d="" /></clipPath>
+            <filter id="s2-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+          </defs>
+        </svg>
+        <div id="s2-steps">
+          <div class="s2-step" id="s2-st1"><i>1</i>Match</div><span class="rule"></span>
+          <div class="s2-step" id="s2-st2"><i>2</i>Convert</div><span class="rule"></span>
+          <div class="s2-step" id="s2-st3"><i>3</i>Clear</div>
+        </div>
+
+        <div class="s2-panel" id="s2-p1">
+          <div class="lab" id="s2-chip1"><b>Same place</b> · <b>same day</b> · both overpass ~1:30 pm</div>
+          <div id="s2-px"></div>
+          <svg id="s2-pxsvg" viewBox="0 0 330 330"></svg>
+          <div class="lab" id="s2-mlab">MODIS · 1 km pixel</div>
+          <div class="lab" id="s2-vlab">VIIRS · 375 m pixels</div>
+          <div id="s2-eq">
+            <div class="serif s2-n" style="color:var(--viirs)">3 fires</div>
+            <div class="lab s2-eqlab">seen by VIIRS</div>
+            <div class="serif s2-n" style="color:var(--modis)">1 fire</div>
+            <div class="lab s2-eqlab">seen by MODIS</div>
+          </div>
+        </div>
+
+        <div id="s2-p2">
+          <div id="s2-stage">
+            <div class="lab" id="s2-chip2">Exchange rate · <b style="color:var(--ember)">VIIRS fires per MODIS fire</b></div>
+            <div class="s2-head lab"><span style="width:456px">Region</span><span style="width:152px">Month</span><span style="width:228px">Pass</span><span>Rate</span></div>
+            <div id="s2-rows" style="position:relative"><div id="s2-hl"></div></div>
+          </div>
+          <div class="serif" id="s2-rate">Bangladesh: <span class="v">3 VIIRS</span> <span class="a">≈</span> <span class="m">1 MODIS</span></div>
+        </div>
+
+        <div class="s2-panel" id="s2-p3">
+          <div class="lab" id="s2-chip3">A cloudy day <b style="color:var(--ember)">≠</b> a fire-free day</div>
+          <div class="lab" id="s2-clab">Cloud-free land</div>
+          <div class="serif" id="s2-pct">38%</div>
+          <div id="s2-pctbar"><span id="s2-pctfill"></span></div>
+          <div class="lab" id="s2-ccap">Fire counts corrected for cloud cover</div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, E = window.EARTH, BD = K.BD, OFF = 10;
+          var tl = gsap.timeline({ paused: true });
+          var svg = document.getElementById("s2-svg"), clipP = document.getElementById("s2-clipp");
+
+          // ---------- on the planet: outline, sensor swaths, matched pairs, revealed fires, cloud sweep
+          var outline = K.svg("path", { d: "", fill: "none", stroke: "rgba(243,238,228,0.55)", "stroke-width": 1.2 }, svg);
+          var swG = K.svg("g", { "clip-path": "url(#s2-clip)" }, svg);
+          var swM = K.svg("g", {}, swG), swV = K.svg("g", {}, swG);
+          K.svg("rect", { x: -400, y: -90, width: 2000, height: 180, fill: "#f2b862", opacity: 0.2 }, swM);
+          K.svg("rect", { x: -400, y: 88, width: 2000, height: 3, fill: "#ffd79a", filter: "url(#s2-glow)" }, swM);
+          K.svg("rect", { x: -400, y: -120, width: 2000, height: 240, fill: "#8fbaff", opacity: 0.18 }, swV);
+          K.svg("rect", { x: -400, y: 118, width: 2000, height: 3, fill: "#cfe0ff", filter: "url(#s2-glow)" }, swV);
+          var pairs = [];
+          for (var i = 0; i < 16; i++) {
+            var ll = BD.fires[(i * 19) % BD.fires.length];
+            var g = K.svg("g", { opacity: 0 }, svg);
+            K.svg("rect", { x: -11, y: -11, width: 22, height: 22, fill: "rgba(242,184,98,0.12)", stroke: "#f2b862", "stroke-width": 1.6 }, g);
+            [[-8, -8], [0, -2], [-5, 3]].forEach(function (o) { K.svg("rect", { x: o[0], y: o[1], width: 6, height: 6, fill: "#8fbaff" }, g); });
+            pairs.push({ g: g, ll: ll });
+          }
+          var leader = K.svg("polyline", { points: "", fill: "none", stroke: "rgba(243,238,228,0.5)", "stroke-width": 1 }, svg);
+          var revealed = BD.fires.filter(function (_, i) { return i % 3 === 0; }).map(function (ll) {
+            return { el: K.svg("circle", { r: 3.6, fill: "#ff7a3d", opacity: 0, filter: "url(#s2-glow)" }, svg), ll: ll };
+          });
+          var sweep = K.svg("path", { d: "", fill: "none", stroke: "#ff7a3d", "stroke-width": 2, filter: "url(#s2-glow)", opacity: 0 }, svg);
+
+          // ---------- P1: pixel diagram over a magnified crop of the real Blue Marble tile
+          var P0 = pairs[0].ll, Z = 11, TPX = 4096 / 35;
+          var px = document.getElementById("s2-px");
+          px.style.backgroundSize = 4096 * Z + "px " + 4096 * Z + "px";
+          px.style.backgroundPosition = -((P0[0] - 65) * TPX * Z - 165) + "px " + -((40 - P0[1]) * TPX * Z - 165) + "px";
+          var pxs = document.getElementById("s2-pxsvg"), vcells = [];
+          K.svg("rect", { x: 0, y: 0, width: 330, height: 330, fill: "rgba(242,184,98,0.08)", stroke: "#f2b862", "stroke-width": 3 }, pxs);
+          var vs = 330 * 0.375, lit = { "0,1": 1, "1,2": 1, "2,0": 1 };
+          for (var gy = 0; gy < 3; gy++) for (var gx = 0; gx < 3; gx++) {
+            var w = Math.min(vs, 330 - gx * vs), h = Math.min(vs, 330 - gy * vs);
+            var r2 = K.svg("rect", { x: gx * vs + 5, y: gy * vs + 5, width: w - 10, height: h - 10, fill: "none", stroke: "#8fbaff", "stroke-width": 1.5, opacity: 0 }, pxs);
+            vcells.push({ el: r2, on: !!lit[gx + "," + gy] });
+          }
+
+          // ---------- P2 split-flap board (mechanism from the registry split-flap-board block)
+          var AL = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,'", N = AL.length, FLIP = 0.03;
+          var data = [["AMAZON", "AUG", "DAY", "2.4"], ["C AFRICA", "DEC", "DAY", "2.7"], ["SIBERIA", "JUL", "NIGHT", "3.6"], ["AUSTRALIA", "OCT", "DAY", "2.2"], ["BANGLADESH", "APR", "DAY", "3.0"]];
+          var COLS = [12, 4, 6, 3], rowsEl = document.getElementById("s2-rows"), cells = [];
+          data.forEach(function (row, ri) {
+            var str = row.map(function (v, k) { return (v + "            ").slice(0, COLS[k]); }).join("");
+            var r = document.createElement("div");
+            r.className = "s2-row"; r.id = "s2-row-" + ri; rowsEl.appendChild(r);
+            for (var ci = 0; ci < str.length; ci++) {
+              var cell = document.createElement("div");
+              cell.className = "s2-cell";
+              cell.setAttribute("data-layout-allow-overlap", ""); cell.setAttribute("data-layout-allow-occlusion", ""); cell.setAttribute("data-layout-allow-overflow", "");
+              cell.innerHTML = '<div class="s2-face s2-top"><span class="s2-g" data-layout-allow-overlap></span></div><div class="s2-face s2-bot"><span class="s2-g" data-layout-allow-overlap></span></div><div class="s2-face s2-la"><span class="s2-g" data-layout-allow-overlap></span></div><div class="s2-face s2-lb"><span class="s2-g" data-layout-allow-overlap></span></div><div class="s2-seam"></div>';
+              r.appendChild(cell);
+              var q = cell.querySelectorAll(".s2-g"), fc = cell.querySelectorAll(".s2-face"), tgt = AL.indexOf(str.charAt(ci));
+              cells.push({ top: q[0], bot: q[1], la: fc[2], lb: fc[3], ga: q[2], gb: q[3], steps: tgt < 0 ? 0 : tgt, start: 4.7 + ri * 0.14 + ci * 0.012 });
+            }
+          });
+          function leaf(l, g, ch, ang) {
+            if (ch === null) { l.style.opacity = "0"; l.style.transform = ""; g.textContent = ""; return; }
+            l.style.opacity = "1"; l.style.transform = "rotateX(" + ang.toFixed(1) + "deg)"; g.textContent = ch;
+          }
+          function paintBoard(t) {
+            for (var i = 0; i < cells.length; i++) {
+              var c = cells[i], raw = Math.max(0, (t - c.start) / FLIP), n = Math.floor(raw), p = raw - n;
+              if (n >= c.steps) { n = c.steps; p = 0; }
+              var o = AL.charAt(n % N), inc = AL.charAt((n + 1) % N);
+              if (!(n < c.steps && p > 0)) { c.top.textContent = o; c.bot.textContent = o; leaf(c.la, c.ga, null); leaf(c.lb, c.gb, null); continue; }
+              c.top.textContent = inc; c.bot.textContent = o;
+              var th = 180 * p * p;
+              if (th < 90) { leaf(c.la, c.ga, o, -th); leaf(c.lb, c.gb, null); } else { leaf(c.la, c.ga, null); leaf(c.lb, c.gb, inc, 180 - th); }
+            }
+          }
+          gsap.set("#s2-hl", { y: 4 * 61 - 9 });
+
+          var pctEl = document.getElementById("s2-pct");
+          K.drive(tl, 15, function (t) {
+            var T = t + OFF, oPath = K.ringPath(T, BD.rings, 0);
+            outline.setAttribute("d", oPath); clipP.setAttribute("d", oPath);
+            outline.setAttribute("opacity", (K.p(t, 0.3, 1.2) * (1 - K.p(t, 4.3, 4.6) + K.p(t, 8.3, 8.8))).toFixed(3));
+            // swaths sweep down the country (tilted like a real ground track)
+            var cy = 360;
+            swM.setAttribute("transform", "rotate(-14 557 " + cy + ") translate(0 " + K.lerp(-140, 1200, K.inOut(K.p(t, 0.4, 2.0))).toFixed(1) + ")");
+            swV.setAttribute("transform", "rotate(-14 557 " + cy + ") translate(0 " + K.lerp(-180, 1240, K.inOut(K.p(t, 1.0, 2.6))).toFixed(1) + ")");
+            swG.setAttribute("opacity", (1 - K.p(t, 3.6, 4.3)).toFixed(3));
+            var pairsOut = 1 - K.p(t, 4.3, 4.6);
+            pairs.forEach(function (pp, i) {
+              var p = E.project(T, pp.ll[0], pp.ll[1]);
+              pp.g.setAttribute("transform", "translate(" + p[0].toFixed(1) + " " + p[1].toFixed(1) + ")");
+              pp.g.setAttribute("opacity", (K.out(K.p(t, 2.2 + i * 0.05, 2.5 + i * 0.05)) * pairsOut * (i === 0 ? 1 : 1 - 0.5 * K.p(t, 0.8, 1.2))).toFixed(3));
+            });
+            // leader from the first pair to the magnified pixel
+            var a = E.project(T, P0[0], P0[1]), ld = K.p(t, 0.7, 1.3) * (1 - K.p(t, 4.2, 4.4));
+            var bx = K.lerp(a[0] + 12, 1080, ld), by = K.lerp(a[1], 475, ld);
+            leader.setAttribute("points", (a[0] + 12).toFixed(1) + "," + a[1].toFixed(1) + " " + bx.toFixed(1) + "," + by.toFixed(1));
+            leader.setAttribute("opacity", ld > 0 ? 1 : 0);
+            vcells.forEach(function (v, i) {
+              v.el.setAttribute("opacity", K.p(t, 1.5, 2.0));
+              v.el.setAttribute("fill", v.on && t > 2.0 + i * 0.12 ? "rgba(143,186,255,0.55)" : "none");
+            });
+            paintBoard(t);
+            // clouds are swept off west -> east along the same line the Earth uses
+            var st = E.state(T), wl = st.wipe, on = t > 9.4 && t < 12.1;
+            if (on) {
+              var pts = [];
+              for (var la = 17; la <= 30.5; la += 0.5) { var q = E.project(T, wl, la); pts.push([q[0], q[1]]); }
+              sweep.setAttribute("d", K.line(pts));
+            }
+            sweep.setAttribute("opacity", on ? 0.95 : 0);
+            revealed.forEach(function (f) {
+              var p = E.project(T, f.ll[0], f.ll[1]);
+              f.el.setAttribute("cx", p[0].toFixed(1)); f.el.setAttribute("cy", p[1].toFixed(1));
+              f.el.setAttribute("opacity", t > 9.4 && wl > f.ll[0] ? 1 : 0);
+            });
+            pctEl.textContent = Math.round(K.lerp(38, 100, K.inOut(K.p(t, 9.4, 12.0)))) + "%";
+          });
+
+          // ---------- choreography
+          tl.fromTo("#s2-root", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0);
+          tl.fromTo("#s2-steps", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.1);
+          var active = "#ff7a3d", done = "#f3eee4", idle = "rgba(243,238,228,0.32)";
+          tl.fromTo("#s2-st1", { color: idle }, { color: active, duration: 0.3 }, 0.2);
+          tl.to("#s2-st1", { color: done, duration: 0.3 }, 4.5);
+          tl.fromTo("#s2-st2", { color: idle }, { color: active, duration: 0.3 }, 4.5);
+          tl.to("#s2-st2", { color: done, duration: 0.3 }, 8.5);
+          tl.fromTo("#s2-st3", { color: idle }, { color: active, duration: 0.3 }, 8.5);
+          tl.to("#s2-st3", { color: done, duration: 0.3 }, 12.6);
+          // P1
+          tl.fromTo("#s2-p1", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.3);
+          tl.fromTo("#s2-chip1", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.4);
+          tl.fromTo(["#s2-px", "#s2-pxsvg"], { opacity: 0, scale: 0.6, transformOrigin: "0% 50%" }, { opacity: 1, scale: 1, duration: 0.8, ease: "expo.out" }, 0.9);
+          tl.fromTo("#s2-mlab", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.1);
+          tl.fromTo("#s2-vlab", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.6);
+          tl.fromTo("#s2-eq", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, 2.9);
+          tl.to("#s2-p1", { opacity: 0, x: -40, duration: 0.4, ease: "power2.in" }, 4.3);
+          tl.to("#s2-scrim", { opacity: 0.35, duration: 0.5 }, 4.4);
+          tl.to("#s2-scrim", { opacity: 1, duration: 0.5 }, 8.4);
+          // P2 — the board swings in and the camera keeps drifting toward it
+          tl.fromTo("#s2-stage", { opacity: 0, rotationY: -16, rotationX: 7, z: -160 }, { opacity: 1, rotationY: -7, rotationX: 4, z: 0, duration: 0.9, ease: "power3.out" }, 4.5);
+          tl.to("#s2-stage", { rotationY: -2, rotationX: 2, z: 40, duration: 3.0, ease: "none" }, 5.4);
+          tl.fromTo("#s2-hl", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 6.9);
+          tl.to(["#s2-row-0", "#s2-row-1", "#s2-row-2", "#s2-row-3"], { opacity: 0.28, duration: 0.4 }, 6.9);
+          tl.fromTo("#s2-rate", { opacity: 0, y: 30, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "expo.out" }, 7.1);
+          tl.to("#s2-p2", { opacity: 0, duration: 0.4, ease: "power2.in" }, 8.3);
+          // P3
+          tl.fromTo("#s2-p3", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 8.6);
+          tl.fromTo("#s2-pctfill", { scaleX: 0.38 }, { scaleX: 1, duration: 2.6, ease: "power2.inOut" }, 9.4);
+          tl.to("#s2-root", { opacity: 0, duration: 0.4, ease: "power1.in" }, 14.6);
+          window.__timelines["s2-fix"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

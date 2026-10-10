@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #s5-cv { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+        #s5-svg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #s5-toggle { position: absolute; left: 120px; top: 150px; display: flex; align-items: center; gap: 14px; }
+        #s5-sw { position: relative; width: 52px; height: 26px; border-radius: 13px; border: 1px solid rgba(243, 238, 228, 0.4); background: rgba(0, 0, 0, 0.35); }
+        #s5-knob { position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); }
+        #s5-src { position: absolute; left: 120px; top: 920px; }
+        #s5-right { position: absolute; left: 1080px; top: 200px; width: 760px; }
+        .s5-blk { margin-top: 30px; display: flex; align-items: flex-end; gap: 28px; }
+        .s5-num { font-size: 180px; line-height: 0.82; font-variant-numeric: tabular-nums; }
+        .s5-txt { line-height: 2; padding-bottom: 4px; }
+        #s5-beats { display: flex; gap: 8px; margin-top: 22px; }
+        .s5-beat { width: 46px; height: 3px; background: var(--hair); }
+        #s5-season { margin-top: 56px; position: relative; height: 170px; }
+        #s5-axis { position: absolute; left: 0; right: 0; top: 104px; }
+        #s5-axis span { position: absolute; top: 0; font-family: var(--mono); font-size: 14px; color: var(--faint); }
+        #s5-ghost { position: absolute; top: 52px; height: 30px; border: 1px dashed rgba(243, 238, 228, 0.4); border-radius: 2px; }
+        #s5-bar { position: absolute; top: 52px; height: 30px; border-radius: 2px; background: linear-gradient(90deg, rgba(255, 122, 61, 0.35), var(--ember)); box-shadow: 0 0 30px rgba(255, 122, 61, 0.45); }
+        #s5-barlab { position: absolute; left: 0; top: 10px; color: var(--ink); }
+        #s5-shift { position: absolute; top: 140px; font-size: 40px; color: var(--ember); }
+      </style>
+      <div id="s5-root" data-composition-id="s5-kilns" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div class="scrim scrim-r"></div>
+        <canvas id="s5-cv" width="1920" height="1080"></canvas>
+        <svg id="s5-svg" viewBox="0 0 1920 1080"></svg>
+        <div id="s5-toggle"><span class="lab" id="s5-day" style="color:var(--ink)">Day</span><div id="s5-sw"><div id="s5-knob"></div></div><span class="lab" id="s5-night">Night</span></div>
+        <div class="lab" id="s5-src">Bangladesh · 3,653 brick kilns</div>
+        <div id="s5-right">
+          <div class="kick">Extension 2 · kilns</div>
+          <div class="s5-blk" id="s5-b1"><div class="serif s5-num" id="s5-n1">0</div><div class="lab s5-txt"><div>of <b>3,653 kilns</b></div><div>seen by fire satellites</div><div>the fire is inside an oven</div></div></div>
+          <div id="s5-b2">
+            <div class="s5-blk"><div class="serif s5-num" style="color:#ffc266"><span id="s5-n2">0</span> / 13</div><div class="lab s5-txt"><div>winters seen by</div><div><b>NASA Black Marble</b> night lights</div></div></div>
+            <div id="s5-beats"></div>
+          </div>
+          <div id="s5-season">
+            <div id="s5-ghost"></div>
+            <div id="s5-bar"></div>
+            <div class="lab" id="s5-barlab">Kiln season · 2012</div>
+            <div id="s5-axis"></div>
+            <div class="serif" id="s5-shift"><i>◀ starts 2 months earlier</i></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, E = window.EARTH, BD = K.BD, OFF = 47;
+          var tl = gsap.timeline({ paused: true });
+          var ctx = document.getElementById("s5-cv").getContext("2d"), svg = document.getElementById("s5-svg");
+          var outline = K.svg("path", { d: "", fill: "none", stroke: "rgba(243,238,228,0.45)", "stroke-width": 1.1 }, svg);
+          // warm glow sprite for the night kilns
+          var spr = document.createElement("canvas"); spr.width = spr.height = 32;
+          (function () { var g = spr.getContext("2d"), gr = g.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, "rgba(255,214,150,1)"); gr.addColorStop(0.25, "rgba(255,150,60,0.75)"); gr.addColorStop(1, "rgba(255,110,30,0)"); g.fillStyle = gr; g.fillRect(0, 0, 32, 32); })();
+          var rnd = K.rng(905);
+          var fires = BD.fires.map(function (f, i) { return { ll: f, t0: 1.5 + (i / BD.fires.length) * 2.8 + rnd() * 0.2 }; });
+          var hits = [];
+          for (var h = 0; h < 37; h++) hits.push({ ll: BD.kilns[(h * 97 + 13) % BD.kilns.length], el: K.svg("circle", { r: 7, fill: "none", stroke: "#ff4a48", "stroke-width": 1.6, opacity: 0 }, svg) });
+          var beatsEl = document.getElementById("s5-beats"), beats = [];
+          for (var b = 0; b < 13; b++) { var d = document.createElement("div"); d.className = "s5-beat"; beatsEl.appendChild(d); beats.push(d); }
+          var n1 = document.getElementById("s5-n1"), n2 = document.getElementById("s5-n2"), lab = document.getElementById("s5-barlab");
+          // season axis: Sep..May over 760px
+          var MW = 760 / 8.6, ax = document.getElementById("s5-axis");
+          ["SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR", "APR", "MAY"].forEach(function (m, i) { var s = document.createElement("span"); s.style.left = i * MW + "px"; s.textContent = m; ax.appendChild(s); });
+          gsap.set("#s5-ghost", { left: 3 * MW, width: 4.5 * MW, opacity: 0 });
+          gsap.set("#s5-bar", { left: 3 * MW, width: 4.5 * MW });
+          gsap.set("#s5-shift", { left: 1 * MW });
+          gsap.set("#s5-barlab", { left: 3 * MW });
+
+          var NIGHT = 5.2, BEAT0 = 5.8, BEAT = 0.215;
+          K.drive(tl, 11, function (t) {
+            var T = t + OFF, night = t >= NIGHT;
+            outline.setAttribute("d", K.ringPath(T, BD.rings, 0));
+            outline.setAttribute("stroke", night ? "rgba(243,238,228,0.22)" : "rgba(243,238,228,0.45)");
+            outline.setAttribute("opacity", K.p(t, 0.2, 0.9));
+            var lit = 0, pulse = 0;
+            for (var w = 0; w < 13; w++) { var bt = BEAT0 + w * BEAT; if (t >= bt) { lit = w + 1; pulse = Math.max(pulse, Math.exp(-(t - bt) * 9)); } }
+            ctx.clearRect(0, 0, 1920, 1080);
+            var nk = BD.kilns.length;
+            if (!night) {
+              ctx.fillStyle = "rgba(30,18,12,0.92)";
+              for (var i = 0; i < nk; i++) {
+                if (t <= 0.3 + (i / nk) * 1.1) continue;
+                var p = E.project(T, BD.kilns[i][0], BD.kilns[i][1]);
+                ctx.fillRect(p[0] - 1.6, p[1] - 1.6, 3.2, 3.2);
+              }
+            } else {
+              ctx.globalCompositeOperation = "lighter";
+              var gs = 6 + 5 * pulse;
+              ctx.globalAlpha = 0.16 + 0.34 * pulse;
+              for (var j = 0; j < nk; j++) { var q = E.project(T, BD.kilns[j][0], BD.kilns[j][1]); ctx.drawImage(spr, q[0] - gs, q[1] - gs, gs * 2, gs * 2); }
+              ctx.globalAlpha = 0.8 + 0.2 * pulse; ctx.fillStyle = "#ffd59a";
+              for (var k2 = 0; k2 < nk; k2++) { var q2 = E.project(T, BD.kilns[k2][0], BD.kilns[k2][1]); ctx.fillRect(q2[0] - 1, q2[1] - 1, 2, 2); }
+              ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+            }
+            // fire detections rain down around the kilns (by day); faint at night
+            fires.forEach(function (f) {
+              var pr = K.p(t, f.t0, f.t0 + 0.35);
+              if (pr <= 0) return;
+              var p = E.project(T, f.ll[0], f.ll[1]), dy = (1 - K.out(pr)) * -90;
+              ctx.globalAlpha = night ? 0.15 : Math.min(1, pr * 3) * 0.9;
+              if (pr < 1) { ctx.strokeStyle = "rgba(255,140,80,0.6)"; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(p[0], p[1] + dy - 30); ctx.lineTo(p[0], p[1] + dy); ctx.stroke(); }
+              ctx.fillStyle = "#ff7a3d"; ctx.beginPath(); ctx.arc(p[0], p[1] + dy, 3.2, 0, 6.283); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            var caught = Math.round(37 * K.p(t, 2.0, 4.6));
+            hits.forEach(function (c, i) {
+              var p = E.project(T, c.ll[0], c.ll[1]);
+              c.el.setAttribute("cx", p[0].toFixed(1)); c.el.setAttribute("cy", p[1].toFixed(1));
+              c.el.setAttribute("opacity", !night && i < caught ? 1 : 0);
+            });
+            n1.textContent = caught;
+            beats.forEach(function (el, i) { el.style.background = i < lit ? "#ffc266" : "rgba(243,238,228,0.18)"; el.style.boxShadow = i === lit - 1 ? "0 0 " + (16 * pulse).toFixed(0) + "px #ffc266" : "none"; });
+            n2.textContent = lit;
+            lab.textContent = t < 9.4 ? "Kiln season · 2012" : "Kiln season · today";
+          });
+
+          tl.fromTo("#s5-root", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0);
+          tl.fromTo(["#s5-toggle", "#s5-src"], { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.4);
+          tl.fromTo("#s5-right .kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.3);
+          tl.fromTo("#s5-b1", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "expo.out" }, 1.8);
+          // the light switch
+          tl.to("#s5-knob", { x: 26, backgroundColor: "#ffc266", duration: 0.12, ease: "power2.out" }, NIGHT - 0.1);
+          tl.to("#s5-sw", { borderColor: "#ffc266", duration: 0.12 }, NIGHT - 0.1);
+          tl.to("#s5-day", { color: "rgba(243,238,228,0.4)", duration: 0.1 }, NIGHT);
+          tl.to("#s5-night", { color: "#ffc266", duration: 0.1 }, NIGHT);
+          tl.to("#s5-b1", { opacity: 0.32, duration: 0.3 }, NIGHT);
+          tl.fromTo("#s5-b2", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "expo.out" }, NIGHT + 0.2);
+          // season slides two months earlier
+          tl.fromTo("#s5-season", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 8.6);
+          tl.to("#s5-b2", { opacity: 0.32, duration: 0.3 }, 8.6);
+          tl.to("#s5-ghost", { opacity: 1, duration: 0.2 }, 9.3);
+          tl.to(["#s5-bar", "#s5-barlab"], { x: -2 * MW, duration: 0.8, ease: "power3.inOut" }, 9.3);
+          tl.fromTo("#s5-shift", { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 9.9);
+          tl.to("#s5-root", { opacity: 0, duration: 0.35 }, 10.65);
+          window.__timelines["s5-kilns"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

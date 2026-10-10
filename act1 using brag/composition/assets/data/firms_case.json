@@ -1,0 +1,98 @@
+{
+ "date": "2013-04-12",
+ "modis": [
+  {
+   "satellite": "Aqua",
+   "acq_time": "0703",
+   "latitude": "22.9198",
+   "longitude": "92.2903",
+   "scan": "1.1",
+   "track": "1.1",
+   "confidence": "100",
+   "frp": "209.9"
+  }
+ ],
+ "viirs": [
+  {
+   "acq_time": "0727",
+   "latitude": "22.92686",
+   "longitude": "92.29125",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "80.91"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.93084",
+   "longitude": "92.28593",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "10.22"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.92635",
+   "longitude": "92.28642",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "103.31"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.92184",
+   "longitude": "92.28677",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "l",
+   "frp": "103.31"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.92236",
+   "longitude": "92.29167",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "80.91"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.91734",
+   "longitude": "92.28722",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "6.53"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.91983",
+   "longitude": "92.28458",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "24.37"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.92037",
+   "longitude": "92.28936",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "51.68"
+  },
+  {
+   "acq_time": "0727",
+   "latitude": "22.92093",
+   "longitude": "92.29424",
+   "scan": "0.49",
+   "track": "0.48",
+   "confidence": "n",
+   "frp": "51.68"
+  }
+ ]
+}

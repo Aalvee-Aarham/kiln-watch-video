@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #s1-kicker { position: absolute; left: 120px; top: 238px; }
+        #s1-head { position: absolute; left: 112px; top: 282px; font-size: 112px; line-height: 0.98; }
+        #s1-head span { display: block; }
+        #s1-h2 { color: var(--alarm); }
+        #s1-svg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #s1-cam { position: absolute; left: 0; top: 0; padding: 9px 16px; border: 1px solid rgba(255, 74, 72, 0.7); background: rgba(10, 4, 4, 0.55); font-family: var(--sans); font-weight: 600; font-size: 15px; letter-spacing: 0.26em; text-transform: uppercase; color: #ff8a86; white-space: nowrap; }
+      </style>
+      <div id="s1-root" data-composition-id="s1-clue" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div class="scrim scrim-l"></div>
+        <div class="kick" id="s1-kicker">The clue · raw fire counts</div>
+        <div class="serif" id="s1-head"><span id="s1-h1">Same week.</span><span id="s1-h2"><i>Every continent.</i></span></div>
+        <svg id="s1-svg" viewBox="0 0 1920 1080"></svg>
+        <div id="s1-cam">Camera change · VIIRS joins</div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, MONTHS = K.MONTHS, J = K.J2012, T = K.TR;
+          var svg = document.getElementById("s1-svg");
+          var tr = K.buildTraces(svg, { id: "s1" });
+          tr.rows.forEach(function (r) { r.pts = r.s.raw.map(function (v, m) { return [T.x(m), r.amp(v)]; }); });
+          // the satellite that "is" the camera change: a glint crossing the sky at the hit
+          var sat = K.svg("g", { opacity: 0 }, svg);
+          var trail = K.svg("path", { d: "", fill: "none", stroke: "rgba(200,220,255,0.55)", "stroke-width": 1.4 }, sat);
+          var glint = K.svg("circle", { r: 4, fill: "#fff", filter: "url(#s1-glow)" }, sat);
+          var satAt = function (u) { var x = K.lerp(380, 1840, u); return [x, 170 - 60 * Math.sin(Math.PI * u) + 0.04 * (x - 380)]; };
+
+          var tl = gsap.timeline({ paused: true });
+          K.drive(tl, 10, function (t) {
+            // lines draw 0.6 -> 4.0 (slow through MODIS years, quicker after)
+            var n = Math.floor(K.inOut(K.p(t, 0.6, 4.0)) * (MONTHS - 1)) + 1;
+            var slice = K.out(K.p(t, 4.1, 4.5)), heat = K.p(t, 4.3, 4.9);
+            tr.rows.forEach(function (r, i) {
+              r.g.setAttribute("opacity", K.out(K.p(t, 0.15 + i * 0.08, 0.75 + i * 0.08)).toFixed(3));
+              r.pre.setAttribute("d", K.line(r.pts.slice(0, Math.min(n, J + 1))));
+              r.post.setAttribute("d", n > J ? K.line(r.pts.slice(J, n)) : "");
+              r.post.setAttribute("stroke", heat > 0 ? "#ff4a48" : "rgba(243,238,228,0.88)");
+              r.post.setAttribute("stroke-width", (1.6 + heat * 0.9).toFixed(2));
+              var hp = r.pts[n - 1];
+              r.head.setAttribute("cx", hp[0]); r.head.setAttribute("cy", hp[1]);
+              r.head.setAttribute("opacity", t > 0.6 && t < 4.2 ? 1 : 0);
+              r.lab.setAttribute("fill", heat > 0.5 ? "rgba(255,170,160,0.95)" : "rgba(243,238,228,0.85)");
+            });
+            tr.ax.forEach(function (a, i) { a.setAttribute("opacity", K.p(t, 0.6, 1.1)); if (i === 1) a.setAttribute("fill", heat > 0 ? "#ff6a66" : "rgba(243,238,228,0.7)"); });
+            tr.red.setAttribute("y2", K.lerp(tr.yTop, tr.yBot, slice).toFixed(1));
+            tr.red.setAttribute("opacity", slice > 0 ? 1 : 0);
+            var flash = t > 8.2 ? Math.max(0, 1 - (t - 8.2) / 0.7) : 0;
+            tr.glow.setAttribute("opacity", (0.16 * slice + 0.55 * flash).toFixed(3));
+            // satellite crosses the red line exactly at 8.2
+            var u = K.p(t, 7.55, 8.95);
+            sat.setAttribute("opacity", (u > 0 && u < 1 ? Math.min(1, u * 8, (1 - u) * 8) : 0).toFixed(3));
+            var pts = []; for (var k = 0; k <= 24; k++) pts.push(satAt(Math.max(0, u - 0.22 + (k / 24) * 0.22)));
+            trail.setAttribute("d", K.line(pts));
+            var sp = satAt(u); glint.setAttribute("cx", sp[0]); glint.setAttribute("cy", sp[1]);
+          });
+          tl.fromTo("#s1-kicker", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 0.3);
+          tl.fromTo("#s1-h1", { opacity: 0, y: 36, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, ease: "power3.out" }, 4.9);
+          tl.fromTo("#s1-h2", { opacity: 0, y: 36, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, ease: "power3.out" }, 5.3);
+          // "Cameras do." — the red line names its cause
+          gsap.set("#s1-cam", { left: tr.X12 + 18, top: tr.yTop - 6 });
+          tl.fromTo("#s1-cam", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 8.2);
+          tl.fromTo("#s1-root", { x: 0 }, { x: 5, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 8.2);
+          tl.to("#s1-root", { opacity: 0, duration: 0.35, ease: "power1.in" }, 9.65);
+          window.__timelines["s1-clue"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

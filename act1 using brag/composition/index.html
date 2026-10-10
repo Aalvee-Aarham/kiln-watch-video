@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1920, height=1080" />
+<title>Kiln Watch Act 1</title>
+<script src="assets/lib/gsap.min.js"></script>
+<script src="assets/lib/d3-array.min.js"></script>
+<script src="assets/lib/d3-geo.min.js"></script>
+<script src="assets/lib/topojson-client.min.js"></script>
+<script src="assets/lib/satellite.min.js"></script>
+<style>
+@font-face{font-family:"Anek Bangla";src:url(assets/fonts/anek-bangla-latin-wght-normal.woff2) format("woff2");font-weight:100 800}
+@font-face{font-family:"Anek Bangla";src:url(assets/fonts/anek-bangla-bengali-wght-normal.woff2) format("woff2");font-weight:100 800;unicode-range:U+0951-0952,U+0964-0965,U+0980-09FE,U+200C-200D,U+25CC}
+@font-face{font-family:"IBM Plex Mono";src:url(assets/fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2");font-weight:400}
+@font-face{font-family:"IBM Plex Mono";src:url(assets/fonts/ibm-plex-mono-latin-600-normal.woff2) format("woff2");font-weight:600}
+@font-face{font-family:"Caveat";src:url(assets/fonts/caveat-latin-700-normal.woff2) format("woff2");font-weight:700}
+:root{
+  --bg:#161d24;--bg-deep:#10161c;--panel:rgba(16,22,28,.84);--hair:rgba(230,224,212,.16);
+  --ink:#e6e0d4;--ink-2:#b4b8b9;--ember:#d9895b;--amber:#e8b77a;--ash:#8a8580;--brick:#c96a56;--steel:#8fa6b8;--sage:#a3b99d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg-deep)}
+#root{position:relative;width:100%;height:100%;overflow:hidden;font-family:"Anek Bangla",sans-serif;color:var(--ink);background:var(--bg-deep)}
+.full{position:absolute;inset:0}
+.mono{font-family:"IBM Plex Mono",monospace}
+.src{position:absolute;left:56px;bottom:30px;font-family:"IBM Plex Mono",monospace;font-size:18px;letter-spacing:.02em;color:#cfd1d0;text-shadow:0 1px 3px rgba(10,14,18,.95),0 1px 14px rgba(10,14,18,.9);white-space:nowrap}
+#bgfield{background:radial-gradient(1400px 900px at 50% 46%,#1c252e,#121920 70%,#0f151b)}
+#globeWrap,#c2dWrap{pointer-events:none}
+canvas{display:block}
+.vwrap{position:absolute;inset:0;overflow:hidden}
+.vwrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tint{position:absolute;inset:0}
+
+/* A · 2003-2012 */
+#yrBlock{position:absolute;left:104px;top:64px;display:flex;align-items:baseline;white-space:nowrap}
+#yr{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:84px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink)}
+#explode{font-weight:650;font-size:84px;margin-left:8px;color:var(--brick);transform-origin:0% 70%}
+#yrsub{position:absolute;left:108px;top:186px;font-family:"IBM Plex Mono",monospace;font-size:20px;letter-spacing:.16em;color:var(--ink-2)}
+#flash{background:radial-gradient(closest-side at 50% 50%,rgba(201,106,86,0) 62%,rgba(201,106,86,.42) 100%);opacity:0}
+#rawline{position:absolute;left:84px;top:262px;width:470px;height:240px}
+
+/* C · pixels */
+#pxcard{position:absolute;left:64px;top:64px;width:660px;padding:28px 32px 22px;border-radius:14px;background:var(--panel);border:2px solid var(--hair)}
+#pxcard .hd{font-family:"IBM Plex Mono",monospace;font-size:19px;letter-spacing:.1em;color:var(--ink-2);margin-bottom:12px}
+.pxrow{display:grid;grid-template-columns:1fr 110px 180px;align-items:center;padding:12px 0;border-top:2px solid rgba(230,224,212,.1)}
+.pxrow .s{font-weight:640;font-size:34px;line-height:1.05}
+.pxrow .s small{display:block;margin-top:4px;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:18px;color:var(--ink-2);letter-spacing:.03em}
+.pxrow .n{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:68px;text-align:right;padding-right:20px;font-variant-numeric:tabular-nums}
+.pxrow .u{font-family:"IBM Plex Mono",monospace;font-size:19px;color:var(--ink-2);line-height:1.3}
+
+/* D · pin */
+#pin{position:absolute;left:930px;top:470px;width:60px;height:90px}
+#pinLabel{position:absolute;left:1000px;top:448px;white-space:nowrap}
+#pinLabel .a{font-weight:650;font-size:58px;text-shadow:0 2px 22px rgba(10,14,18,.85)}
+#pinLabel .b{font-family:"IBM Plex Mono",monospace;font-size:20px;letter-spacing:.3em;color:var(--amber);margin-top:2px;text-shadow:0 1px 12px rgba(10,14,18,.9)}
+
+/* E · Bhaluka */
+#loc{position:absolute;left:96px;top:812px;font-weight:640;font-size:56px;text-shadow:0 2px 24px rgba(10,14,18,.8)}
+#facts{position:absolute;left:98px;top:888px;font-size:34px;font-weight:500;color:var(--ink);text-shadow:0 2px 18px rgba(10,14,18,.85)}
+#facts b{color:var(--amber);font-weight:640}
+.date{position:absolute;left:96px;display:flex;align-items:center;gap:18px;padding:14px 26px 12px 22px;border-radius:12px;background:var(--panel);border:2px solid var(--hair);font-family:"IBM Plex Mono",monospace;font-size:32px;color:var(--ink)}
+.date i{display:block;width:14px;height:14px;border-radius:50%;background:var(--ember)}
+#d1{top:92px}#d2{top:180px}
+#clip{position:absolute;left:1000px;top:120px;width:840px;padding:34px 42px 38px;border-radius:6px;background:#efe9de;color:#2a2622;box-shadow:0 30px 90px rgba(6,9,12,.55);transform-origin:100% 0%}
+#clip .out{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:18px;letter-spacing:.06em;color:#5d5650;border-bottom:2px solid #2a2622;padding-bottom:12px}
+#clip h1{margin:18px 0 12px;font-weight:700;font-size:40px;line-height:1.32}
+#clip p{font-size:27px;line-height:1.6;color:#3b3631}
+#hl{background-image:linear-gradient(90deg,rgba(232,183,122,.85),rgba(232,183,122,.85));background-repeat:no-repeat;background-size:0% 100%;padding:0 2px}
+#gloss{position:absolute;left:1002px;top:556px;font-size:32px;font-weight:560;text-shadow:0 2px 18px rgba(10,14,18,.9)}
+#gloss b{color:var(--amber);font-weight:650}
+#chip{position:absolute;right:56px;top:48px;font-family:"IBM Plex Mono",monospace;font-size:18px;letter-spacing:.06em;padding:10px 16px;border-radius:8px;background:rgba(239,233,222,.92);color:#2a2622}
+#repr{position:absolute;right:56px;bottom:30px;font-family:"IBM Plex Mono",monospace;font-size:18px;color:var(--ink-2);text-shadow:0 1px 10px rgba(10,14,18,.9)}
+
+/* F · watching */
+#wq{position:absolute;left:0;right:0;top:96px;text-align:center;font-weight:600;font-size:112px;letter-spacing:-.01em;text-shadow:0 4px 40px rgba(10,14,18,.9)}
+#wq span{display:inline-block;margin:0 .12em}
+#w3{color:var(--ember)}
+
+/* G · team */
+#tname{position:absolute;left:96px;top:56px;font-weight:650;font-size:72px;letter-spacing:-.01em;text-shadow:0 2px 24px rgba(10,14,18,.7)}
+#tsub{position:absolute;left:100px;top:156px;font-family:"IBM Plex Mono",monospace;font-size:20px;letter-spacing:.3em;color:var(--ink-2)}
+#tsub b{color:var(--ember);font-weight:600}
+.card{position:absolute;width:320px;text-align:center}
+.card .ph{width:204px;height:255px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 22px 50px rgba(6,9,12,.5),0 0 0 2px rgba(230,224,212,.14)}
+.card img{width:100%;height:100%;object-fit:cover}
+.card .nm{margin-top:13px;font-weight:560;font-size:25px;white-space:nowrap;text-shadow:0 2px 14px rgba(10,14,18,.85)}
+.card .nm b{color:var(--ember);font-weight:680}
+.card .role{margin-top:5px;font-family:"IBM Plex Mono",monospace;font-size:15px;letter-spacing:.05em;text-transform:uppercase;color:var(--steel);line-height:1.35;text-shadow:0 2px 10px rgba(10,14,18,.9)}
+#aq{position:absolute;left:1112px;top:206px;width:740px;height:690px;border-radius:16px;background:var(--panel);border:2px solid var(--hair)}
+#aq .t{position:absolute;left:36px;top:28px;font-weight:640;font-size:38px}
+#aq .s{position:absolute;left:38px;top:80px;font-family:"IBM Plex Mono",monospace;font-size:18px;letter-spacing:.06em;color:var(--ink-2)}
+
+/* H · montage */
+.room{position:absolute;inset:0;background:radial-gradient(1200px 800px at 16% 8%,rgba(217,137,91,.16),transparent 62%),radial-gradient(900px 600px at 86% 96%,rgba(143,166,184,.14),transparent 66%),#11171d}
+.scr{position:absolute;left:320px;top:150px;width:1280px;height:800px;border-radius:18px;overflow:hidden;border:14px solid #0c1014;box-shadow:0 0 120px rgba(143,166,184,.18),0 40px 90px rgba(6,9,12,.65);background:#0b1019}
+.scr img{position:absolute;left:0;top:0;transform-origin:0 0}
+.glare{position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.06),rgba(255,255,255,0) 38%)}
+.cursor{position:absolute;width:36px;height:36px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.ring{position:absolute;left:497px;top:194px;width:116px;height:116px;border:3px solid var(--ember);border-radius:50%}
+.board{position:absolute;left:110px;top:80px;width:1700px;height:920px;border-radius:10px;background:radial-gradient(1300px 900px at 30% 20%,#ece8df,#cfcabf 75%,#a6a197);box-shadow:0 30px 90px rgba(6,9,12,.6);border:16px solid #8d949b}
+.hand{position:absolute;font-family:"Caveat",cursive;font-weight:700;color:#2f3b63;white-space:nowrap}
+
+/* I · question */
+#qt{position:absolute;left:0;right:0;top:56px;text-align:center;font-weight:620;font-size:72px;white-space:nowrap}
+#qt span{opacity:0}
+#panel{position:absolute;left:1010px;top:214px;width:840px;height:700px;border-radius:18px;background:rgba(16,22,28,.9);border:2px solid var(--hair)}
+#panel .pt{position:absolute;left:44px;top:34px;font-weight:620;font-size:40px}
+#panel .ps{position:absolute;left:46px;top:90px;font-family:"IBM Plex Mono",monospace;font-size:18px;color:var(--ink-2);letter-spacing:.04em}
+#yes{position:absolute;left:1580px;top:252px;font-weight:720;font-size:140px;color:var(--brick)}
+#stampWrap{position:absolute;left:1180px;top:500px;width:520px;height:150px;display:flex;align-items:center;justify-content:center}
+#stamp{padding:14px 34px 6px;border:8px solid var(--brick);border-radius:14px;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:84px;letter-spacing:.06em;color:var(--brick);white-space:nowrap;filter:url(#grunge);background:rgba(16,22,28,.55)}
+#dip{background:var(--bg-deep);opacity:0}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="46" data-width="1920" data-height="1080">
+
+  <div id="bgfield" class="full"></div>
+
+  <!-- footage (framework-owned media) -->
+  <div class="vwrap" id="vw-canopy"><video id="v-canopy" class="clip" src="assets/video/canopy_dusk.mp4" muted playsinline data-start="20.45" data-duration="1.05" data-track-index="1"></video><div id="tint-canopy" class="tint clip" data-start="20.45" data-duration="1.05" data-track-index="2" style="background:radial-gradient(1400px 900px at 50% 40%,rgba(60,48,70,.32),rgba(110,70,44,.42))"></div></div>
+  <div class="vwrap" id="vw-sal"><video id="v-sal" class="clip" src="assets/video/sal_forest.mp4" muted playsinline data-start="21.3" data-duration="3.75" data-track-index="1"></video><div id="tint-sal" class="tint clip" data-start="21.3" data-duration="3.75" data-track-index="2" style="background:radial-gradient(1500px 1000px at 50% 30%,rgba(22,29,36,.12),rgba(16,22,28,.62))"></div></div>
+  <div class="vwrap" id="vw-char"><video id="v-char" class="clip" src="assets/video/charred_floor.mp4" muted playsinline data-start="25.05" data-duration="4.9" data-track-index="1"></video><div id="tint-char" class="tint clip" data-start="25.05" data-duration="4.9" data-track-index="2" style="background:radial-gradient(1500px 1000px at 55% 35%,rgba(22,29,36,.15),rgba(16,22,28,.7))"></div></div>
+  <div class="vwrap" id="vw-kiln"><video id="v-kiln" class="clip" src="assets/video/kiln_smoke.mp4" muted playsinline data-start="33.0" data-duration="4.2" data-track-index="1"></video><div id="tint-kiln" class="tint clip" data-start="33.0" data-duration="4.2" data-track-index="2" style="background:radial-gradient(1500px 1100px at 40% 30%,rgba(26,32,38,.5),rgba(16,22,28,.82))"></div></div>
+
+  <div id="globeWrap" class="full"><canvas id="globe" width="1920" height="1080"></canvas></div>
+  <div id="c2dWrap" class="full"><canvas id="c2d" width="1920" height="1080"></canvas></div>
+
+  <!-- A · 0:00-0:10 -->
+  <section id="secA" class="clip full" data-start="0" data-duration="10" data-track-index="2">
+    <div id="flash" class="full"></div>
+    <div id="yrBlock"><span id="yr">2003</span><span id="explode">: FIRES EXPLODE?</span></div>
+    <div id="yrsub">NASA SATELLITE FIRE DETECTIONS · RAW</div>
+    <svg id="rawline" viewBox="0 0 470 240"></svg>
+    <div class="src">DATA · NASA GIBS active fire: MODIS Terra+Aqua, VIIRS S-NPP, 2003–2012 · accessed Oct 2026</div>
+  </section>
+
+  <!-- C · 0:13-0:18 -->
+  <section id="secC" class="clip full" data-start="13" data-duration="5" data-track-index="2">
+    <div id="pxcard">
+      <div class="hd">12 APRIL 2013 · RANGAMATI HILLS, BANGLADESH</div>
+      <div class="pxrow" id="pxm"><div class="s">MODIS<small>AQUA · 13:03 · 1 KM PIXELS</small></div><div class="n">1</div><div class="u">fire pixel</div></div>
+      <div class="pxrow" id="pxv"><div class="s">VIIRS<small>SUOMI NPP · 13:27 · 375 M PIXELS</small></div><div class="n" id="nv" style="color:var(--amber)">0</div><div class="u">fire pixels, same fires</div></div>
+    </div>
+    <div class="src">DATA · NASA FIRMS active fire, 12 Apr 2013 · IMAGERY · Sentinel-2 cloudless 2016, EOX, CC BY 4.0</div>
+  </section>
+
+  <!-- D · 0:18-0:21 -->
+  <section id="secD" class="clip full" data-start="18" data-duration="3.4" data-track-index="2">
+    <svg id="pin" viewBox="0 0 60 90"><ellipse cx="30" cy="86" rx="14" ry="4" fill="rgba(6,9,12,.45)"/><g id="pinBody"><path d="M30 86 C 22 64, 2 50, 2 30 A 28 28 0 0 1 58 30 C 58 50, 38 64, 30 86 Z" fill="#d9895b"/><circle cx="30" cy="30" r="10" fill="#efe9de"/></g></svg>
+    <div id="pinLabel"><div class="a">Bhaluka, Mymensingh</div><div class="b">BANGLADESH</div></div>
+    <div class="src">MAPS · NASA Blue Marble, Dec 2004 · Natural Earth · Kiln Watch upazilas, Oct 2026 · Sentinel-2 cloudless 2016, EOX</div>
+  </section>
+
+  <!-- E · 0:21-0:30 -->
+  <section id="secE" class="clip full" data-start="21.3" data-duration="8.65" data-track-index="2">
+    <div id="loc">Bhaluka reserved forest, Mymensingh</div>
+    <div id="facts"><b>~3 acres burned</b> &nbsp;·&nbsp; <span id="f2">No water nearby: staff beat the flames with branches</span></div>
+    <div class="date" id="d1"><i></i>20 March 2025, 11 pm</div>
+    <div class="date" id="d2"><i></i>24 March, 4 pm and 5:30 pm</div>
+    <div id="clip">
+      <div class="out"><span>প্রথম আলো · PROTHOM ALO</span><span>২৫ মার্চ ২০২৫ · 25 MARCH 2025</span></div>
+      <h1>ময়মনসিংহের ভালুকায় সংরক্ষিত বনাঞ্চলে বারবার আগুনের কারণ কী</h1>
+      <p>ময়মনসিংহের ভালুকায় সংরক্ষিত বনাঞ্চলে অগ্নিকাণ্ডে <span id="hl">প্রায় তিন একর বনভূমি পুড়ে গেছে।</span> এতে হুমকিতে পড়েছে প্রকৃতি ও জীববৈচিত্র্য।</p>
+    </div>
+    <div id="gloss">“About <b>3 acres</b> of reserved forest burned.”</div>
+    <div id="chip">PROTHOM ALO · 25 MAR 2025</div>
+    <div id="repr">representative footage</div>
+    <div class="src" id="srcE1">FOOTAGE · Modhutila Eco Park, Sherpur (Mymensingh div.) by Progga Media / Pexels, Oct 2025</div>
+    <div class="src" id="srcE2">SOURCE · Prothom Alo, 25 Mar 2025 · FOOTAGE · Engin Akyurt / Pexels, Jul 2025</div>
+  </section>
+
+  <!-- F · 0:30-0:33 -->
+  <section id="secF" class="clip full" data-start="30" data-duration="3" data-track-index="2">
+    <div id="wq"><span id="w1">Was</span><span id="w2">anyone</span><span id="w3">watching?</span></div>
+    <div class="src">ORBITS · CelesTrak TLEs, Oct 2026 · SWATHS · NASA (MODIS 2,330 km, VIIRS 3,040 km)</div>
+  </section>
+
+  <!-- G · 0:33-0:37.2 -->
+  <section id="secG" class="clip full" data-start="33" data-duration="4.2" data-track-index="2">
+    <div id="tname">Team Off The Binary</div>
+    <div id="tsub">FROM <b>BANGLADESH</b></div>
+    <div id="cards"></div>
+    <div id="aq"><div class="t">Dhaka's air, every winter</div><div class="s">PM2.5 · 7-DAY MEAN · µg/m³</div><svg id="aqsvg" width="740" height="690" viewBox="0 0 740 690" style="position:absolute;left:0;top:0"></svg></div>
+    <div class="src">AIR · Copernicus CAMS via Open-Meteo, Aug 2022–Sep 2026 · WHO AQ Guidelines, Sep 2021 · FOOTAGE · Emrul Kausar Emon / Pexels, May 2025</div>
+  </section>
+
+  <!-- H · 0:37.2-0:41 -->
+  <section id="secH" class="clip full" data-start="37.2" data-duration="3.8" data-track-index="2">
+    <div class="room" id="m1"><div class="scr" id="s1"><img id="s1img" data-layout-allow-overflow src="assets/img/screen_explore.jpg" alt="Kiln Watch Explorer" width="1920" height="1200"><div class="glare"></div>
+      <svg class="cursor" id="cur1" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1.2L16 21l-3 1.4-3.4-6.8L4 20z" fill="#fff" stroke="#111" stroke-width="1.2"/></svg></div></div>
+    <div class="room" id="m2"><div class="scr" id="s2"><img id="s2img" data-layout-allow-overflow src="assets/img/screen_sensors.jpg" alt="Kiln Watch Sensors" width="1920" height="1200"><div class="glare"></div>
+      <div class="ring" id="r1"></div><div class="ring" id="r2"></div>
+      <svg class="cursor" id="cur2" viewBox="0 0 24 24" style="width:48px;height:48px"><path d="M9 11V4.5a1.5 1.5 0 013 0V10h.5V8.5a1.5 1.5 0 013 0V10h.5V9.5a1.5 1.5 0 013 0V15c0 3.5-2.5 7-6.5 7S8 20 6.5 17.5L4 13a1.5 1.5 0 012.5-1.6L9 14z" fill="#fff" stroke="#111" stroke-width="1.1"/></svg></div></div>
+    <div class="room" id="m3"><div class="board" id="board">
+      <div class="hand" id="h1" style="left:120px;top:150px;font-size:190px">3 VIIRS ≈ 1 MODIS</div>
+      <svg width="1700" height="920" style="position:absolute;left:0;top:0">
+        <path id="ul" d="M130 420 C 520 404, 980 412, 1380 398" fill="none" stroke="#2f3b63" stroke-width="9" stroke-linecap="round"/>
+        <path id="ax" d="M150 560 L 150 800 L 1060 800" fill="none" stroke="#2f3b63" stroke-width="6" stroke-linecap="round"/>
+        <path id="sk" d="M170 760 L 330 748 L 470 756 L 610 742 L 700 744 L 760 600 L 880 586 L 1020 610" fill="none" stroke="#2f3b63" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <ellipse id="circ" cx="735" cy="672" rx="88" ry="112" fill="none" stroke="#a54535" stroke-width="8" transform="rotate(-12 735 672)"/>
+      </svg>
+      <div class="hand" id="h2" style="left:1110px;top:600px;font-size:110px;color:#a54535">2012?</div>
+    </div></div>
+    <div class="src">Kiln Watch, live site, Oct 2026</div>
+  </section>
+
+  <!-- I · 0:41-0:46 -->
+  <section id="secI" class="clip full" data-start="41" data-duration="5" data-track-index="2">
+    <div id="qt"></div>
+    <div id="qstage" class="full">
+      <div id="panel"><div class="pt">Raw fire record · Bangladesh</div><div class="ps">AS RECORDED BY MODIS + VIIRS · 2003–2026</div>
+        <svg id="chart" width="840" height="700" viewBox="0 0 840 700" style="position:absolute;left:0;top:0"></svg></div>
+      <div id="yes">YES</div>
+      <div id="stampWrap"><div id="stamp">UNRELIABLE</div></div>
+    </div>
+    <div class="src" id="srcI">DATA · Kiln Watch harmonization (raw record), Oct 2026 · NASA GIBS VIIRS S-NPP, 2025</div>
+  </section>
+
+  <div id="dip" class="full"></div>
+
+  <audio id="score" src="assets/audio/score.wav" data-start="0" data-duration="46" data-track-index="4" data-volume="1"></audio>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="grunge" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.35" result="m"/>
+    <feComposite in="SourceGraphic" in2="m" operator="in"/>
+  </filter>
+</svg>
+
+<script type="module">
+import * as THREE from "./assets/lib/three.module.js";
+
+const W = 1920, H = 1080, D2R = Math.PI / 180, R_EARTH = 6371;
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, p) => a + (b - a) * p;
+const eio = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const eo = p => 1 - Math.pow(1 - p, 3);
+const ei = p => p * p * p;
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+window.__hf.buildReady["kilnwatch-act1"] = build();
+
+let META, FIRES, CASE, LAND, COUNTRIES, BD, MYM, BHALUKA, GRAT, ORBITS, STARS;
+const IMG = {};
+
+/* ================= Three.js globe: one mesh that morphs sphere -> flat map ================= */
+const gl = new THREE.WebGLRenderer({ canvas: $('globe'), antialias: true, alpha: true, preserveDrawingBuffer: true });
+gl.setSize(W, H, false); gl.setPixelRatio(1); gl.setClearColor(0x000000, 0);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(28, W / H, 0.01, 100);
+const CAM_Z = 5.2, FLAT_K = W / (H / (2 * CAM_Z * Math.tan(14 * D2R))) / (2 * Math.PI);   // flat map spans the frame width at CAM_Z
+const U = { uMorph: { value: 0 }, uRot: { value: 0 }, uTilt: { value: 0 }, uFlat: { value: FLAT_K }, uSun: { value: new THREE.Vector3(-.55, .45, .7).normalize() } };
+const POS_GLSL = `
+  uniform float uMorph, uRot, uTilt, uFlat;
+  vec3 sphereAt(vec2 ll, float r) {
+    float lon = ll.x + uRot, lat = ll.y;
+    vec3 s = r * vec3(cos(lat) * sin(lon), sin(lat), cos(lat) * cos(lon));
+    float ct = cos(uTilt), st = sin(uTilt);
+    return vec3(s.x, s.y * ct - s.z * st, s.y * st + s.z * ct);
+  }
+  vec3 placeAt(vec2 ll, float r) {
+    float k = 1.0 - uMorph * .9995, rho = r / k, lon = (ll.x + uRot) * k, lat = ll.y * k;
+    vec3 s = rho * vec3(cos(lat) * sin(lon), sin(lat), cos(lat) * cos(lon)); s.z -= rho - r;
+    float ct = cos(uTilt), st = sin(uTilt); s = vec3(s.x, s.y * ct - s.z * st, s.y * st + s.z * ct);
+    s *= mix(1.0, uFlat, uMorph); s.z -= r * uFlat * uMorph; return s;
+  }`;
+
+function globeGeometry(nx, ny) {
+  const g = new THREE.BufferGeometry(), ll = [], uv = [], idx = [];
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) {
+    const u = i / nx, v = j / ny; ll.push((u - .5) * 2 * Math.PI, (v - .5) * Math.PI); uv.push(u, v);
+  }
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1; idx.push(a, b, d, a, d, c); }
+  g.setAttribute('ll', new THREE.Float32BufferAttribute(ll, 2)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(ll.length / 2 * 3), 3)); g.setIndex(idx);
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 10); return g;
+}
+const earthTex = new THREE.TextureLoader().load('assets/img/bluemarble_4096.jpg');
+earthTex.colorSpace = THREE.NoColorSpace; earthTex.anisotropy = 8;
+const globeMat = new THREE.ShaderMaterial({
+  uniforms: { ...U, uTex: { value: earthTex } },
+  vertexShader: `attribute vec2 ll; varying vec2 vUv; varying vec3 vN; ${POS_GLSL}
+    void main() { vec3 s = sphereAt(ll, 1.0); vN = normalize(mix(s, vec3(0, 0, 1), uMorph)); vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(placeAt(ll, 1.0), 1.0); }`,
+  fragmentShader: `uniform sampler2D uTex; uniform vec3 uSun; uniform float uMorph; varying vec2 vUv; varying vec3 vN;
+    void main() {
+      vec3 c = texture2D(uTex, vUv).rgb;
+      float l = dot(c, vec3(.299, .587, .114));
+      vec3 m = mix(vec3(l), c, .55) * vec3(.9, .97, 1.04);          // muted, slightly cool
+      m = mix(vec3(.085, .115, .145), m, .82);                        // lifted, compressed blacks
+      float lm = dot(m, vec3(.299, .587, .114)); m *= (lm > .48 ? .48 + (lm - .48) * .4 : lm) / max(lm, 1e-3);   // roll off highlights
+      float d = dot(normalize(vN), uSun);
+      float light = mix(.42 + .58 * smoothstep(-.15, .65, d), .9, uMorph);
+      float rim = mix(pow(1.0 - max(vN.z, 0.0), 2.2) * .18, 0.0, uMorph);   // soft limb haze
+      gl_FragColor = vec4(m * light + vec3(.55, .66, .78) * rim, 1.0);
+    }`,
+});
+const globe = new THREE.Mesh(globeGeometry(360, 180), globeMat); globe.frustumCulled = false;
+const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.07, 96, 64), new THREE.ShaderMaterial({
+  uniforms: { uA: { value: 1 } }, side: THREE.BackSide, transparent: true, depthWrite: false,
+  vertexShader: `varying vec3 vN; void main() { vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform float uA; varying vec3 vN; void main() { float i = pow(clamp(.72 + vN.z, 0.0, 1.0), 3.0); gl_FragColor = vec4(vec3(.5, .62, .76), i * .5 * uA); }`,
+}));
+const group = new THREE.Group(); group.add(atmo, globe); scene.add(group);
+
+// fire detections: one point cloud per month so a frame only draws the few months that are alive
+const fireMat = new THREE.ShaderMaterial({
+  uniforms: { ...U, uMonth: { value: 0 }, uMon: { value: 0 }, uGlow: { value: 1 }, uPx: { value: 3.0 } },
+  transparent: true, depthWrite: false,
+  vertexShader: `attribute vec2 ll; uniform float uMonth, uMon, uPx; varying float vAge; varying float vFace; ${POS_GLSL}
+    void main() { vAge = uMonth - uMon; vec3 s = sphereAt(ll, 1.003);
+      vFace = mix(smoothstep(0.0, .18, s.z), 1.0, uMorph);
+      gl_PointSize = uPx * (1.0 + .9 * exp(-max(vAge, 0.0) * 2.5));
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(placeAt(ll, 1.003), 1.0); }`,
+  fragmentShader: `uniform float uGlow; varying float vAge; varying float vFace;
+    void main() { vec2 c = gl_PointCoord - .5; float r = length(c); if (r > .5 || vAge < 0.0) discard;
+      vec3 amber = vec3(.91, .72, .48), ember = vec3(.85, .54, .36), ash = vec3(.54, .52, .5);
+      vec3 col = vAge < 1.0 ? mix(amber, ember, vAge) : mix(ember, ash, clamp(vAge - 1.0, 0.0, 1.0));
+      float a = exp(-vAge / 1.15) * vFace * smoothstep(.5, .1, r) * .85;
+      gl_FragColor = vec4(min(col * uGlow, vec3(1.0)), a);
+    }`,
+});
+const monthClouds = [];   // {set, mon, points}
+function buildFireClouds() {
+  for (const [key, [o, n]] of Object.entries(META.index)) {
+    const [k, ym] = key.split('_'), [y, m] = ym.split('-').map(Number);
+    const set = y === 2025 ? 1 : 0, mon = set ? m - 1 : (y - 2003) * 12 + m - 1;
+    const ll = new Float32Array(n * 2);
+    for (let i = 0; i < n; i++) { const x = FIRES[2 * (o + i)], yy = FIRES[2 * (o + i) + 1]; ll[2 * i] = (-180 + (x + .5) * .25) * D2R; ll[2 * i + 1] = (90 - (yy + .5) * .25) * D2R; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('ll', new THREE.BufferAttribute(ll, 2)); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+    g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 10);
+    const mat = fireMat.clone(); mat.uniforms = { ...U, uMonth: fireMat.uniforms.uMonth, uGlow: fireMat.uniforms.uGlow, uPx: fireMat.uniforms.uPx, uMon: { value: mon } };
+    const p = new THREE.Points(g, mat); p.visible = false; p.frustumCulled = false; p.renderOrder = 2; group.add(p); monthClouds.push({ set, mon, p });
+  }
+}
+function globeState(t) {
+  // returns uniforms for the current scene; null = globe hidden
+  const deg = v => v * D2R;
+  if (t < 10) {
+    const two012 = t >= 5;
+    return { rot: -deg(lerp(-28, 46, t / 10)), tilt: deg(14), z: CAM_Z, x: .08, y: -.22, morph: 0, set: 0,
+      month: two012 ? 108 + lerp(1, 12, seg(t, 5, 10)) : t / 5 * 108, glow: two012 ? 1 + .75 * Math.exp(-(t - 5) / .4) : 1 };
+  }
+  if (t >= 18 && t < 19.35) {   // fly to Bangladesh, then the 2D map takes over
+    const p = eio(seg(t, 18, 19.3));
+    return { rot: -deg(lerp(52, 90.4, p)), tilt: deg(lerp(14, 23.8, p)), z: lerp(CAM_Z, 1.62, ei(seg(t, 18.15, 19.25))), x: 0, y: 0, morph: 0, set: -1, month: 0, glow: 1 };
+  }
+  if (t >= 41) {
+    const slide = eio(seg(t, 42.75, 43.3)) * (1 - eio(seg(t, 44.95, 45.4)));
+    const morph = eio(seg(t, 45.4, 46.0)), center = eio(seg(t, 44.95, 45.5));
+    return { rot: -deg(lerp(lerp(18, 30, seg(t, 41, 45)), 0, center)), tilt: deg(16 * (1 - center)), z: lerp(5.95, CAM_Z, center), x: -.95 * slide, y: -.2 * (1 - center), morph, set: 1,
+      month: 2 + 3 * seg(t, 41, 46), glow: .95 };
+  }
+  return null;
+}
+function renderGlobe(t) {
+  const s = globeState(t);
+  if (!s) return null;
+  U.uRot.value = s.rot; U.uTilt.value = s.tilt; U.uMorph.value = s.morph;
+  group.position.x = s.x; group.position.y = s.y; camera.position.set(0, 0, s.z); camera.lookAt(0, 0, 0);
+  atmo.material.uniforms.uA.value = 1 - s.morph; atmo.visible = s.morph < .98;
+  fireMat.uniforms.uMonth.value = s.month; fireMat.uniforms.uGlow.value = s.glow;
+  for (const c of monthClouds) { const age = s.month - c.mon; c.p.visible = c.set === s.set && age >= -.01 && age < 3.2; }
+  gl.render(scene, camera);
+  return s;
+}
+// screen position of a lon/lat on the current globe (for 2D labels that sit on it)
+function globeScreen(s, lon, lat) {
+  const lo = lon * D2R + s.rot, la = lat * D2R;
+  let v = new THREE.Vector3(Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo));
+  const ct = Math.cos(s.tilt), st = Math.sin(s.tilt); v = new THREE.Vector3(v.x, v.y * ct - v.z * st, v.y * st + v.z * ct);
+  const front = v.z; v.x += s.x; v.y += s.y; v.project(camera);
+  return { x: (v.x + 1) / 2 * W, y: (1 - v.y) / 2 * H, front };
+}
+
+/* ================= 2D canvas: pixels, map zoom, orbits, globe markers ================= */
+const cv = $('c2d'), ctx = cv.getContext('2d');
+function tileLL(m, tx, ty) { const n = 2 ** m.z; return [tx / n * 360 - 180, Math.atan(Math.sinh(Math.PI * (1 - 2 * ty / n))) / D2R]; }
+function llToMosaic(m, lon, lat) { const n = 2 ** m.z, x = (lon + 180) / 360 * n, y = (1 - Math.log(Math.tan(lat * D2R) + 1 / Math.cos(lat * D2R)) / Math.PI) / 2 * n; return [(x - m.x0) * 256, (y - m.y0) * 256]; }
+const TILES = { rangamati: { z: 15, x0: 24780, y0: 14236, nx: 9, ny: 6 }, z10: { z: 10, x0: 765, y0: 437, nx: 8, ny: 6 }, z12: { z: 12, x0: 3071, y0: 1758, nx: 8, ny: 6 } };
+function drawMosaic(proj, img, m, alpha, filter) {
+  if (alpha <= 0) return;
+  // shortcut: linear placement between projected corners; fine below ~1 degree of latitude
+  const [x0, y0] = proj(tileLL(m, m.x0, m.y0)), [x1, y1] = proj(tileLL(m, m.x0 + m.nx, m.y0 + m.ny));
+  ctx.save(); ctx.globalAlpha = alpha; ctx.filter = filter; ctx.drawImage(img, x0, y0, x1 - x0, y1 - y0); ctx.restore();
+}
+function feather(img, f) {
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d');
+  x.drawImage(img, 0, 0); x.globalCompositeOperation = 'destination-in';
+  for (const [x1, y1] of [[c.width, 0], [0, c.height]]) {
+    const g = x.createLinearGradient(0, 0, x1, y1); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(f, '#000'); g.addColorStop(1 - f, '#000'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
+  }
+  return c;
+}
+function glowDot(x, y, r, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(240,212,170,${a})`); g.addColorStop(.25, `rgba(232,183,122,${a * .85})`); g.addColorStop(.6, `rgba(217,137,91,${a * .35})`); g.addColorStop(1, 'rgba(217,137,91,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+}
+function dimLine(x0, y, x1, label, a) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = '#e6e0d4'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.moveTo(x0, y - 9); ctx.lineTo(x0, y + 9); ctx.moveTo(x1, y - 9); ctx.lineTo(x1, y + 9); ctx.stroke();
+  ctx.font = '600 20px "IBM Plex Mono"'; ctx.fillStyle = '#e6e0d4'; ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(10,14,18,.9)'; ctx.shadowBlur = 8; ctx.fillText(label, (x0 + x1) / 2, y - 14); ctx.restore();
+}
+
+// 0:13 — the real Aqua MODIS pixel and the real Suomi NPP VIIRS pixels of 12 Apr 2013
+const PX = { S: 1.45, cx: 1210, cy: 610 };
+function pxAt(lon, lat) { const m = TILES.rangamati, [ax, ay] = llToMosaic(m, lon, lat), [bx, by] = llToMosaic(m, +CASE.modis[0].longitude, +CASE.modis[0].latitude); return [PX.cx + (ax - bx) * PX.S, PX.cy + (ay - by) * PX.S]; }
+function drawPixels(t) {
+  const m = TILES.rangamati, kmPx = 156543.034 * Math.cos(22.92 * D2R) / 2 ** m.z / PX.S / 1000, s = lerp(1, 1.05, eio(seg(t, 13, 18)));
+  ctx.save(); ctx.translate(PX.cx, PX.cy); ctx.scale(s, s); ctx.translate(-PX.cx, -PX.cy);
+  const [ox, oy] = pxAt(...tileLL(m, m.x0, m.y0));
+  ctx.filter = 'saturate(0.7) contrast(0.92) brightness(0.86)'; ctx.drawImage(IMG.rangamati, ox, oy, IMG.rangamati.width * PX.S, IMG.rangamati.height * PX.S); ctx.filter = 'none';
+  ctx.fillStyle = 'rgba(16,22,28,.22)'; ctx.fillRect(-200, -200, W + 400, H + 400);
+  ctx.globalCompositeOperation = 'lighter';
+  const fa = eo(seg(t, 13.1, 13.5));
+  CASE.viirs.forEach((v, i) => { const [x, y] = pxAt(+v.longitude, +v.latitude); glowDot(x, y, (11 + 3.6 * Math.sqrt(+v.frp)) * (.92 + .08 * Math.sin(t * 17 + i)), fa * .8); });
+  ctx.globalCompositeOperation = 'source-over';
+  CASE.viirs.forEach((v, i) => {
+    const p = seg(t, 14.9 + i * .19, 15.08 + i * .19); if (p <= 0) return;
+    const [x, y] = pxAt(+v.longitude, +v.latitude), w = +v.scan / kmPx, h = +v.track / kmPx, sc = lerp(1.22, 1, eo(p));
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+    ctx.fillStyle = `rgba(232,183,122,${.16 * p})`; ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.strokeStyle = `rgba(232,183,122,${.95 * p})`; ctx.lineWidth = 2.5; ctx.strokeRect(-w / 2, -h / 2, w, h); ctx.restore();
+  });
+  const mo = CASE.modis[0], [mx, my] = pxAt(+mo.longitude, +mo.latitude), ms = +mo.scan / kmPx, mp = seg(t, 13.5, 13.9);
+  if (mp > 0) {
+    const sc = lerp(1.28, 1, eo(mp)), dim = 1 - .45 * seg(t, 14.8, 15.3);
+    ctx.save(); ctx.translate(mx, my); ctx.scale(sc, sc); ctx.globalAlpha = eo(mp) * dim;
+    ctx.fillStyle = `rgba(143,166,184,${.18 * seg(t, 13.9, 14.05)})`; ctx.fillRect(-ms / 2, -ms / 2, ms, ms);
+    ctx.strokeStyle = '#c9d6e0'; ctx.lineWidth = 5; ctx.strokeRect(-ms / 2, -ms / 2, ms, ms); ctx.restore();
+    dimLine(mx - ms / 2, my + ms / 2 + 46, mx + ms / 2, `${(+mo.scan).toFixed(1)} km`, eo(seg(t, 14.0, 14.3)) * dim);
+  }
+  const v0 = CASE.viirs.reduce((a, b) => +b.latitude > +a.latitude ? b : a), [vx, vy] = pxAt(+v0.longitude, +v0.latitude), vw = +v0.scan / kmPx;
+  dimLine(vx - vw / 2, vy - vw / 2 - 30, vx + vw / 2, '375 m', eo(seg(t, 16.75, 17.05)));
+  ctx.restore();
+}
+
+// 0:19 — the globe hands off to a map that dives into Bhaluka at dusk
+const BHALUKA_C = [90.37, 24.39];
+function mapProj(lam, phi, k) { return d3.geoOrthographic().rotate([-lam, -phi]).scale(k).translate([960, 560]).clipAngle(90).precision(k > 4000 ? .15 : .5); }
+const BM = { w: 64, e: 118, n: 42, s: 4 };
+function drawBlueMarble(proj) {
+  const img = IMG.bm, rows = 38, sh = img.height / rows, cLon = (BM.w + BM.e) / 2;
+  ctx.save(); ctx.filter = 'saturate(0.55) contrast(0.9) brightness(0.92) sepia(0.06)';
+  for (let r = 0; r < rows; r++) {   // strips share edges on the centre meridian, so they tile without seams
+    const la0 = BM.n - (BM.n - BM.s) * r / rows, la1 = BM.n - (BM.n - BM.s) * (r + 1) / rows, lm = (la0 + la1) / 2;
+    const y0 = proj([cLon, la0])[1], y1 = proj([cLon, la1])[1], x0 = proj([BM.w, lm])[0], x1 = proj([BM.e, lm])[0];
+    ctx.drawImage(img, 0, r * sh, img.width, sh, x0, y0 - .5, x1 - x0, y1 - y0 + 1);
+  }
+  ctx.restore(); ctx.fillStyle = 'rgba(16,22,28,.18)'; ctx.fillRect(0, 0, W, H);
+}
+function drawMapZoom(t) {
+  const p = eio(seg(t, 19.0, 20.25)), k = 3300 * Math.pow(95000 / 3300, p), proj = mapProj(90.4, lerp(23.8, BHALUKA_C[1], p), k), path = d3.geoPath(proj, ctx), lk = Math.log(k);
+  ctx.fillStyle = '#121920'; ctx.fillRect(0, 0, W, H);
+  drawBlueMarble(proj);
+  ctx.beginPath(); path(COUNTRIES); ctx.strokeStyle = 'rgba(214,214,206,.42)'; ctx.lineWidth = 1.3; ctx.stroke();
+  drawMosaic(proj, IMG.z10, TILES.z10, seg(lk, Math.log(26000), Math.log(48000)), 'saturate(0.72) contrast(0.95) brightness(0.86)');
+  ctx.beginPath(); path(BD); ctx.strokeStyle = `rgba(200,205,205,${.4 * (1 - .6 * seg(lk, Math.log(26000), Math.log(48000)))})`; ctx.lineWidth = 1.3; ctx.stroke();
+  const ua = seg(lk, Math.log(9000), Math.log(26000));
+  if (ua > 0) { ctx.beginPath(); path(MYM); ctx.strokeStyle = `rgba(214,214,206,${.42 * ua})`; ctx.lineWidth = 1.5; ctx.stroke(); }
+  const dusk = seg(t, 19.6, 20.6);
+  if (dusk > 0) { const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, `rgba(38,34,62,${.5 * dusk})`); g.addColorStop(.55, 'rgba(38,34,62,0)'); g.addColorStop(1, `rgba(150,92,52,${.32 * dusk})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
+  const ba = seg(lk, Math.log(20000), Math.log(60000));
+  if (ba > 0) { ctx.beginPath(); path(BHALUKA); ctx.fillStyle = `rgba(217,137,91,${.1 * ba})`; ctx.fill(); ctx.strokeStyle = `rgba(232,160,110,${ba})`; ctx.lineWidth = 3.5; ctx.stroke(); }
+  const bl = seg(t, 19.25, 19.5) * (1 - seg(t, 19.8, 20.0));
+  if (bl > 0) { const [x, y] = proj([90.25, 23.7]); ctx.save(); ctx.globalAlpha = bl; ctx.font = '600 30px "IBM Plex Mono"'; ctx.letterSpacing = '8px'; ctx.fillStyle = '#e6e0d4'; ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(10,14,18,.9)'; ctx.shadowBlur = 12; ctx.fillText('BANGLADESH', x, y); ctx.restore(); }
+}
+
+// 0:30 — real passes of the five fire satellites over Bangladesh
+const SATS = [['TERRA', 'MODIS', 2330], ['AQUA', 'MODIS', 2330], ['SUOMI NPP', 'VIIRS', 3040], ['NOAA-20', 'VIIRS', 3040], ['NOAA-21', 'VIIRS', 3040]];
+function dest([lon, lat], brg, km) { const d = km / R_EARTH, p1 = lat * D2R, l1 = lon * D2R, p2 = Math.asin(Math.sin(p1) * Math.cos(d) + Math.cos(p1) * Math.sin(d) * Math.cos(brg)); return [(l1 + Math.atan2(Math.sin(brg) * Math.sin(d) * Math.cos(p1), Math.cos(d) - Math.sin(p1) * Math.sin(p2))) / D2R, p2 / D2R]; }
+function bearing([lo1, la1], [lo2, la2]) { const p1 = la1 * D2R, p2 = la2 * D2R, dl = (lo2 - lo1) * D2R; return Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl)); }
+function buildOrbits(tle) {
+  const lines = tle.trim().split(/\r?\n/), dhaka = [90.4, 23.8], t0 = Date.UTC(2026, 9, 10);   // fixed date: deterministic
+  ORBITS = SATS.map(([name, sensor, swath], i) => {
+    const rec = satellite.twoline2satrec(lines[3 * i + 1], lines[3 * i + 2]);
+    const at = ms => { const d = new Date(ms), pv = satellite.propagate(rec, d), g = satellite.eciToGeodetic(pv.position, satellite.gstime(d)); return [satellite.degreesLong(g.longitude), satellite.degreesLat(g.latitude)]; };
+    let best = null;
+    for (let ms = t0; ms < t0 + 864e5; ms += 30e3) { const p = at(ms), dd = d3.geoDistance(p, dhaka), hr = (new Date(ms).getUTCHours() + 6) % 24; if (hr > 8 && hr < 17 && (!best || dd < best.dd)) best = { ms, dd }; }
+    const track = []; for (let ms = best.ms - 4.5 * 60e3; ms <= best.ms + 4.5 * 60e3; ms += 5e3) track.push(at(ms));
+    const sides = track.map((p, j) => { const b = bearing(track[Math.max(0, j - 1)], track[Math.min(track.length - 1, j + 1)]); return [dest(p, b - Math.PI / 2, swath / 2), dest(p, b + Math.PI / 2, swath / 2)]; });
+    const lt = new Date(best.ms + 6 * 3600e3);
+    return { name, sensor, track, sides, time: `${String(lt.getUTCHours()).padStart(2, '0')}:${String(lt.getUTCMinutes()).padStart(2, '0')}` };
+  });
+}
+function drawOrbits(t) {
+  const proj = mapProj(90.4, 22.6, 4200), path = d3.geoPath(proj.translate([960, 650]), ctx), fa = eo(seg(t, 30.0, 30.5));
+  ctx.fillStyle = '#121920'; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.globalAlpha = fa;
+  ctx.beginPath(); path({ type: 'Sphere' }); ctx.fillStyle = '#141c23'; ctx.fill();
+  ctx.beginPath(); path(COUNTRIES); ctx.fillStyle = '#1f2930'; ctx.fill(); ctx.strokeStyle = 'rgba(180,184,185,.28)'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.beginPath(); path(BD); ctx.fillStyle = '#2b373e'; ctx.fill(); ctx.strokeStyle = 'rgba(200,205,205,.45)'; ctx.stroke();
+  ORBITS.forEach((o, i) => {
+    const a = 30.15 + .42 * i, p = seg(t, a, a + 1.7); if (p <= 0) return;
+    const n = Math.max(2, Math.floor(p * (o.track.length - 1)) + 1), col = o.sensor === 'MODIS' ? '201,214,224' : '232,183,122', sw = 1 - .6 * seg(t, a + 1.7, a + 2.4);
+    ctx.beginPath();
+    for (let j = 0; j < n; j++) { const q = proj(o.sides[j][0]); j ? ctx.lineTo(...q) : ctx.moveTo(...q); }
+    for (let j = n - 1; j >= 0; j--) ctx.lineTo(...proj(o.sides[j][1]));
+    ctx.fillStyle = `rgba(${col},${.05 * sw})`; ctx.fill(); ctx.strokeStyle = `rgba(${col},${.28 * sw})`; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.beginPath(); for (let j = 0; j < n; j++) { const q = proj(o.track[j]); j ? ctx.lineTo(...q) : ctx.moveTo(...q); }
+    ctx.strokeStyle = `rgba(${col},.8)`; ctx.lineWidth = 2; ctx.stroke();
+    const [sx, sy] = proj(o.track[n - 1]);
+    ctx.fillStyle = `rgb(${col})`; ctx.beginPath(); ctx.arc(sx, sy, 6, 0, 7); ctx.fill();
+    ctx.font = '600 19px "IBM Plex Mono"'; ctx.letterSpacing = '2px'; ctx.fillStyle = '#e6e0d4'; ctx.shadowColor = 'rgba(10,14,18,.9)'; ctx.shadowBlur = 8;
+    ctx.fillText(`${o.name} · ${o.sensor} · ${o.time}`, sx + 16, sy + 6); ctx.shadowBlur = 0; ctx.letterSpacing = '0px';
+  });
+  ctx.restore();
+  const g = ctx.createRadialGradient(960, 600, 320, 960, 600, 1150); g.addColorStop(0, 'rgba(14,19,24,0)'); g.addColorStop(1, 'rgba(14,19,24,.75)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const g2 = ctx.createLinearGradient(0, 0, 0, 420); g2.addColorStop(0, 'rgba(14,19,24,.85)'); g2.addColorStop(1, 'rgba(14,19,24,0)'); ctx.fillStyle = g2; ctx.fillRect(0, 0, W, 420);
+}
+
+// 0:41 — "?" markers riding on the 3D globe
+const ASKS = [[-58, -9], [24, -2], [79, 23], [104, 57], [-100, 45]];
+function drawAsks(t, s) {
+  ASKS.forEach(([lon, lat], i) => {
+    const p = seg(t, 41.65 + i * .17, 41.95 + i * .17), out = 1 - seg(t, 44.95, 45.2); if (p <= 0 || out <= 0) return;
+    const q = globeScreen(s, lon, lat); if (q.front < .15) return;
+    const c1 = 1.70158, sc = 1 + (c1 + 1) * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
+    ctx.save(); ctx.translate(q.x, q.y); ctx.scale(sc, sc); ctx.globalAlpha = clamp(p * 2) * out;
+    ctx.fillStyle = 'rgba(16,22,28,.86)'; ctx.strokeStyle = '#d9895b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 27, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.font = '700 36px "Anek Bangla"'; ctx.fillStyle = '#e6e0d4'; ctx.textAlign = 'center'; ctx.fillText('?', 0, 13); ctx.restore();
+  });
+}
+
+function renderCanvases(t) {
+  if (t < 10) { $('yr').textContent = t < 5 ? 2003 + Math.min(8, Math.floor(t / 5 * 9)) : 2012; $('yr').style.color = t < 5 ? '#e6e0d4' : '#c96a56'; }
+  if (t >= 13 && t < 18) $('nv').textContent = CASE.viirs.filter((_, i) => t >= 14.9 + i * .19).length;
+  const s = renderGlobe(t);
+  if (!s) gl.clear();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H); ctx.globalAlpha = 1; ctx.filter = 'none';
+  if (t >= 13 && t < 18) drawPixels(t);
+  else if (t >= 19.0 && t < 21.0) drawMapZoom(t);
+  else if (t >= 30 && t < 33) drawOrbits(t);
+  else if (t >= 41 && s) drawAsks(t, s);
+}
+
+/* ================= DOM builders ================= */
+const TEAM = [['Arna', 'Israt Jahan <b>Arna</b>', 'Frontend Engineering Lead'], ['Nazifa', '<b>Nazifa</b> Jahan', 'Research &amp; Innovation Lead'], ['Omee', 'Sajid Alam Chowdhury <b>Omee</b>', 'Backend Systems Engineer'],
+  ['Aalvee', '<b>Aalvee</b> Aarham', 'AI Systems Architect &amp; Project Lead'], ['Maruf', '<b>Maruf</b> Hasan Tawhid', 'Data Acquisition &amp; ML Lead'], ['Ahnaf', 'Muhammad <b>Ahnaf</b> Sarker', 'Web Design, Presentation &amp; Communications Lead']];
+function buildTeam() {
+  $('cards').innerHTML = TEAM.map(([f, n, r], i) => `<div class="card" id="card${i}" style="left:${[96, 420, 744][i % 3]}px;top:${i < 3 ? 222 : 580}px"><div class="ph"><img src="assets/img/${f}.jpg" alt="${f}"></div><div class="nm">${n}</div><div class="role">${r}</div></div>`).join('');
+  const raw = META.pm25, sm = raw.map((r, i) => { const w = raw.slice(Math.max(0, i - 3), i + 4); return [r[0], w.reduce((s, x) => s + x[1], 0) / w.length]; });
+  const t0 = Date.parse(sm[0][0]), t1 = Date.parse(sm[sm.length - 1][0]), x0 = 60, x1 = 690, y0 = 600, y1 = 160, vmax = 260;
+  const X = d => x0 + (x1 - x0) * (Date.parse(d) - t0) / (t1 - t0), Y = v => y0 - (y0 - y1) * Math.min(v, vmax) / vmax;
+  const winters = [2022, 2023, 2024, 2025].map(y => [X(`${y}-12-01`), X(`${y + 1}-02-28`)]);
+  const line = sm.map(([d, v], i) => `${i ? 'L' : 'M'}${X(d).toFixed(1)},${Y(v).toFixed(1)}`).join('');
+  const w = raw.filter(r => ['12', '01', '02'].includes(r[0].slice(5, 7))), wm = w.reduce((s, r) => s + r[1], 0) / w.length;
+  $('aqsvg').innerHTML = `
+    <defs><linearGradient id="aqg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9895b" stop-opacity=".5"/><stop offset="1" stop-color="#d9895b" stop-opacity="0"/></linearGradient>
+      <clipPath id="aqclip"><rect id="aqcr" x="0" y="0" width="740" height="690"/></clipPath></defs>
+    ${winters.map(([a, b]) => `<rect x="${a}" y="${y1 - 8}" width="${b - a}" height="${y0 - y1 + 8}" fill="rgba(143,166,184,.1)"/>`).join('')}
+    ${winters.map(([a, b]) => `<text x="${(a + b) / 2}" y="${y1 - 18}" text-anchor="middle" font-family="IBM Plex Mono" font-size="18" fill="#a9bccb">WINTER</text>`).join('')}
+    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="rgba(230,224,212,.25)" stroke-width="2"/>
+    <g clip-path="url(#aqclip)"><path d="${line}L${x1},${y0}L${x0},${y0}Z" fill="url(#aqg)"/><path d="${line}" fill="none" stroke="#e0a271" stroke-width="2.6"/></g>
+    <line x1="${x0}" y1="${Y(15)}" x2="${x1}" y2="${Y(15)}" stroke="#a3b99d" stroke-width="2.5" stroke-dasharray="7 7"/>
+    <text x="${x0 + 6}" y="${Y(15) + 24}" font-family="IBM Plex Mono" font-size="18" fill="#a3b99d">WHO 24-H GUIDELINE · 15</text>
+    ${['2023', '2024', '2025', '2026'].map(y => `<text x="${X(y + '-01-01')}" y="${y0 + 32}" text-anchor="middle" font-family="IBM Plex Mono" font-size="18" fill="#b4b8b9">${y}</text>`).join('')}
+    <g id="aqcall"><text x="${x0}" y="${y0 + 74}" font-family="Anek Bangla" font-weight="620" font-size="32" fill="#e6e0d4">Winter average: <tspan fill="#e0a271">${(wm / 15).toFixed(0)}× the WHO guideline</tspan></text></g>`;
+}
+function buildRawLine() {
+  const yrs = META.annual, vmax = 1.08e6, x0 = 20, x1 = 420, y0 = 180, y1 = 40;
+  const X = i => x0 + (x1 - x0) * i / 9, Y = v => y0 - (y0 - y1) * v / vmax;
+  const pts = Array.from({ length: 9 }, (_, i) => `${X(i).toFixed(1)},${Y(yrs[2003 + i]).toFixed(1)}`).join(' ');
+  $('rawline').innerHTML = `
+    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="rgba(230,224,212,.28)" stroke-width="2"/>
+    <polyline id="rl" points="${pts}" fill="none" stroke="#e6e0d4" stroke-width="3" stroke-linejoin="round"/>
+    <line id="rjump" x1="${X(8)}" y1="${Y(yrs[2011])}" x2="${X(9)}" y2="${Y(yrs[2011])}" stroke="#c96a56" stroke-width="4" stroke-linecap="round"/>
+    <circle id="rdot" cx="${X(9)}" cy="${Y(yrs[2012])}" r="7" fill="#c96a56"/>
+    <text x="${x0}" y="${y0 + 34}" font-family="IBM Plex Mono" font-size="20" fill="#b4b8b9">2003</text>
+    <text id="r2012" x="${X(9) - 26}" y="${y0 + 34}" font-family="IBM Plex Mono" font-weight="600" font-size="20" fill="#c96a56">2012</text>
+    <text x="${x0}" y="${y1 - 8}" font-family="IBM Plex Mono" font-size="18" fill="#b4b8b9">FIRE DETECTIONS PER YEAR</text>`;
+  return { jumpY: Y(yrs[2012]) };
+}
+function buildChart() {
+  const raw = META.bdRaw, x0 = 70, x1 = 780, y0 = 610, y1 = 170, vmax = 90;
+  const X = i => x0 + (x1 - x0) * i / (raw.length - 1), Y = v => y0 - (y0 - y1) * v / vmax;
+  const pre = raw.slice(0, 9).map(r => r[1]), lo = Math.min(...pre), hi = Math.max(...pre), last = raw.length - 1;
+  $('chart').innerHTML = `
+    <rect x="${x0}" y="${Y(hi)}" width="${x1 - x0}" height="${Y(lo) - Y(hi)}" fill="rgba(163,185,157,.16)"/>
+    <text x="${x0 + 8}" y="${Y(lo) + 28}" font-family="IBM Plex Mono" font-size="18" fill="#a3b99d">NORMAL · 2003–2012</text>
+    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="rgba(230,224,212,.25)" stroke-width="2"/>
+    ${[0, 9, last].map(i => `<text x="${X(i)}" y="${y0 + 32}" font-family="IBM Plex Mono" font-size="18" fill="#b4b8b9" text-anchor="middle">${raw[i][0]}</text>`).join('')}
+    <polyline id="cl" points="${raw.map((r, i) => `${X(i).toFixed(1)},${Y(r[1]).toFixed(1)}`).join(' ')}" fill="none" stroke="#e6e0d4" stroke-width="3.5" stroke-linejoin="round"/>
+    <circle id="cdot" cx="${X(last)}" cy="${Y(raw[last][1])}" r="9" fill="#c96a56"/>
+    <text id="clab" x="${X(last) + 4}" y="${Y(raw[last][1]) + 42}" font-family="IBM Plex Mono" font-weight="600" font-size="19" fill="#d98270" text-anchor="end">THIS SEASON</text>`;
+}
+const QUESTION = 'Is this season worse than normal?';
+function buildQuestion() { $('qt').innerHTML = [...QUESTION].map(ch => `<span>${ch === ' ' ? '&nbsp;' : ch}</span>`).join(''); }
+
+/* ================= timeline ================= */
+function buildTimeline(raw) {
+  const tl = gsap.timeline({ paused: true });
+  const clock = { t: 0 };
+  tl.to(clock, { t: 46, duration: 46, ease: 'none', onUpdate: () => renderCanvases(clock.t) }, 0);
+
+  // layer visibility
+  tl.set('#globeWrap', { opacity: 1 }, 0).set('#globeWrap', { opacity: 0 }, 10).set('#globeWrap', { opacity: 1 }, 18)
+    .to('#globeWrap', { opacity: 0, duration: .25, ease: 'none' }, 19.0).set('#globeWrap', { opacity: 1 }, 41);
+  tl.set('#c2dWrap', { opacity: 1 }, 0).to('#c2dWrap', { opacity: 0, duration: .45, ease: 'none' }, 20.5).set('#c2dWrap', { opacity: 1 }, 29.9);
+
+  // dips through the background colour
+  tl.set('#dip', { opacity: 1 }, 12.99).to('#dip', { opacity: 0, duration: .15, ease: 'none' }, 13.0)
+    .to('#dip', { opacity: 1, duration: .1, ease: 'none' }, 17.9).to('#dip', { opacity: 0, duration: .15, ease: 'none' }, 18.0)
+    .to('#dip', { opacity: 1, duration: .55, ease: 'power1.in' }, 29.4).to('#dip', { opacity: 0, duration: .01 }, 29.99)
+    .to('#dip', { opacity: 1, duration: .12, ease: 'none' }, 37.05).to('#dip', { opacity: 0, duration: .14, ease: 'none' }, 37.2)
+    .to('#dip', { opacity: 1, duration: .1, ease: 'none' }, 40.9).to('#dip', { opacity: 0, duration: .15, ease: 'none' }, 41.0);
+
+  // A · year counter, the raw line, 2012
+  tl.fromTo('#explode', { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: .3, ease: 'power3.out' }, 5.12);
+  tl.fromTo('#yrsub', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .5, ease: 'power2.out' }, .3);
+  const rl = $('rl'), rlL = rl.getTotalLength();
+  tl.fromTo('#rl', { strokeDasharray: rlL, strokeDashoffset: rlL }, { strokeDashoffset: 0, duration: 4.44, ease: 'none' }, 0);
+  tl.fromTo('#rjump', { attr: { y2: $('rjump').getAttribute('y1') } }, { attr: { y2: raw.jumpY }, duration: .35, ease: 'back.out(2)' }, 5.0);
+  tl.fromTo('#rjump', { opacity: 0 }, { opacity: 1, duration: .05 }, 5.0);
+  tl.fromTo(['#rdot', '#r2012'], { opacity: 0 }, { opacity: 1, duration: .15 }, 5.2);
+  tl.fromTo('#flash', { opacity: 0 }, { opacity: 1, duration: .08, ease: 'none' }, 5.0).to('#flash', { opacity: .3, duration: 1.0, ease: 'power2.out' }, 5.08);
+
+  // C · pixels
+  tl.fromTo('#pxcard', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: .45, ease: 'power3.out' }, 13.3);
+  tl.fromTo('#pxm', { opacity: 0 }, { opacity: 1, duration: .3 }, 13.9).fromTo('#pxv', { opacity: 0 }, { opacity: 1, duration: .3 }, 14.75);
+
+  // D · pin
+  tl.fromTo('#pinBody', { y: -320 }, { y: 0, duration: .3, ease: 'bounce.out' }, 20.12);
+  tl.fromTo('#pin', { opacity: 0 }, { opacity: 1, duration: .08 }, 20.12);
+  tl.fromTo('#pinLabel', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .3, ease: 'power3.out' }, 20.38);
+  tl.to(['#pin', '#pinLabel'], { opacity: 0, duration: .25 }, 20.6);
+
+  // footage: canopy dissolve, forest push-ins
+  tl.fromTo('#vw-canopy', { opacity: 0, scale: 1.0 }, { opacity: 1, scale: 1.08, duration: 1.0, ease: 'power1.inOut' }, 20.45);
+  tl.fromTo('#vw-sal', { opacity: 0, scale: 1.12, xPercent: 4 }, { opacity: 1, duration: .25, ease: 'none' }, 21.3).to('#vw-sal', { scale: 1.2, xPercent: 6, duration: 3.75, ease: 'none' }, 21.3);
+  tl.fromTo('#vw-char', { scale: 1.03 }, { scale: 1.16, duration: 4.9, ease: 'power1.inOut' }, 25.05);
+  tl.fromTo('#vw-kiln', { scale: 1.04 }, { scale: 1.1, duration: 4.2, ease: 'none' }, 33.0);
+
+  // E · Bhaluka: clipping, dates, facts
+  tl.fromTo('#loc', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: .5, ease: 'power3.out' }, 21.45);
+  tl.fromTo('#clip', { opacity: 0, y: 36, rotation: -1.4 }, { opacity: 1, y: 0, rotation: 0, duration: .45, ease: 'power3.out' }, 21.55);
+  tl.to('#hl', { backgroundSize: '100% 100%', duration: .5, ease: 'power2.inOut' }, 22.0);
+  tl.fromTo('#gloss', { opacity: 0 }, { opacity: 1, duration: .3 }, 22.15).to('#gloss', { opacity: 0, duration: .25 }, 22.85);
+  tl.to('#clip', { scale: .22, opacity: 0, duration: .4, ease: 'power2.in' }, 22.85);
+  tl.fromTo('#chip', { opacity: 0 }, { opacity: 1, duration: .25 }, 23.15);
+  tl.fromTo('#d1', { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: .4, ease: 'power3.out' }, 23.3);
+  tl.fromTo('#d2', { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: .4, ease: 'power3.out' }, 25.2);
+  tl.fromTo('#facts', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, 26.2);
+  tl.fromTo('#f2', { opacity: 0 }, { opacity: 1, duration: .35 }, 26.85);
+  tl.fromTo('#repr', { opacity: 0 }, { opacity: 1, duration: .3 }, 25.2);
+  tl.fromTo('#srcE1', { opacity: 0 }, { opacity: 1, duration: .3 }, 21.5).to('#srcE1', { opacity: 0, duration: .2 }, 24.85);
+  tl.fromTo('#srcE2', { opacity: 0 }, { opacity: 1, duration: .3 }, 25.05);
+
+  // F · Was anyone watching?
+  [['#w1', 30.22], ['#w2', 30.52], ['#w3', 30.86]].forEach(([id, a]) => tl.fromTo(id, { opacity: 0, y: 14, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .38, ease: 'power2.out' }, a));
+  tl.fromTo('#w3', { color: '#e6e0d4' }, { color: '#d9895b', duration: .7, ease: 'power1.inOut' }, 31.05);
+  tl.to('#wq', { opacity: 0, duration: .22 }, 32.78);
+
+  // G · team
+  tl.fromTo('#tname', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: .45, ease: 'power3.out' }, 33.05);
+  tl.fromTo('#tsub', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .45, ease: 'power3.out' }, 33.25);
+  TEAM.forEach((_, i) => tl.fromTo('#card' + i, { opacity: 0, y: 70, rotation: (i % 2 ? 1 : -1) * 4, scale: .9 }, { opacity: 1, y: 0, rotation: 0, scale: 1, duration: .5, ease: 'back.out(1.4)' }, 33.3 + .3 * i));
+  tl.fromTo('#aq', { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: .45, ease: 'power3.out' }, 34.7);
+  tl.fromTo('#aqcr', { attr: { width: 0 } }, { attr: { width: 740 }, duration: 1.4, ease: 'power2.inOut' }, 35.0);
+  tl.fromTo('#aqcall', { opacity: 0 }, { opacity: 1, duration: .3 }, 36.2);
+
+  // H · montage (cuts on the beat: 37.2, 38.0, 38.9 — the whiteboard now holds nearly 2.1s so
+  // "3 VIIRS ≈ 1 MODIS" has time to be read, instead of the old 39.7-41.0 sliver)
+  tl.set('#m1', { opacity: 1 }, 37.2).set('#m1', { opacity: 0 }, 38.0).set('#m2', { opacity: 0 }, 37.2).set('#m2', { opacity: 1 }, 38.0).set('#m2', { opacity: 0 }, 38.9).set('#m3', { opacity: 0 }, 37.2).set('#m3', { opacity: 1 }, 38.9);
+  tl.fromTo('#s1', { rotationY: -19, rotationX: 5, scale: 1, transformPerspective: 1900 }, { rotationY: -11, scale: 1.08, duration: .75, ease: 'power2.inOut' }, 37.2);
+  tl.set('#s1img', { scale: .6667 }, 37.2);
+  tl.fromTo('#cur1', { x: 900, y: 640 }, { x: 405, y: 470, duration: .55, ease: 'power2.inOut' }, 37.3);
+  tl.fromTo('#s2', { rotationY: 15, rotationX: 4, scale: 1.02, transformPerspective: 1900 }, { rotationY: 9, scale: 1.1, duration: .85, ease: 'power2.inOut' }, 38.0);
+  tl.set('#s2img', { x: -300, y: -300 }, 38.0);   // the 2012 jump lands at (555, 252) on screen
+  tl.fromTo('#cur2', { x: 1010, y: 700 }, { x: 545, y: 248, duration: .5, ease: 'power2.inOut' }, 38.05).to('#cur2', { scale: .86, duration: .08, yoyo: true, repeat: 1 }, 38.6);
+  [['#r1', 38.68], ['#r2', 38.78]].forEach(([id, a]) => tl.fromTo(id, { scale: .14, opacity: 1 }, { scale: 1.3, opacity: 0, duration: .3, ease: 'power2.out' }, a));
+  tl.fromTo('#board', { rotationY: -7, rotationX: 3, scale: 1, transformPerspective: 2200 }, { rotationY: -3, scale: 1.05, duration: 1.3, ease: 'power2.inOut' }, 38.9);
+  tl.fromTo('#h1', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: .65, ease: 'none' }, 38.95);
+  for (const [id, a, b] of [['#ul', 39.48, .17], ['#ax', 39.50, .15], ['#sk', 39.62, .28], ['#circ', 39.88, .2]]) { const L = $(id.slice(1)).getTotalLength(); tl.fromTo(id, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: b, ease: 'none' }, a); }
+  tl.fromTo('#h2', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: .23, ease: 'none' }, 39.92);
+  // the finished "3 VIIRS = 1 MODIS" phrase now holds fully visible from ~39.6 to 41.0 (1.4s) before the cut
+
+  // I · question, raw answer, stamp, clear the stage for the unwrap
+  tl.to('#qt span', { opacity: 1, duration: .01, stagger: 1.0 / QUESTION.length }, 41.2);
+  tl.to('#qt', { opacity: .65, duration: .3 }, 44.4).to('#qt', { opacity: 0, duration: .35 }, 45.0);
+  tl.fromTo('#panel', { opacity: 0, x: 140 }, { opacity: 1, x: 0, duration: .45, ease: 'power3.out' }, 42.85);
+  const cl = $('cl'), L = cl.getTotalLength();
+  tl.fromTo('#cl', { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: .55, ease: 'power2.inOut' }, 43.05);
+  tl.fromTo(['#cdot', '#clab'], { opacity: 0 }, { opacity: 1, duration: .2 }, 43.55);
+  tl.fromTo('#yes', { opacity: 0, scale: 1.45 }, { opacity: 1, scale: 1, duration: .22, ease: 'back.out(2)' }, 43.68);
+  tl.fromTo('#stamp', { opacity: 0, scale: 2.6, rotation: -9 }, { opacity: 1, scale: 1, rotation: -9, duration: .16, ease: 'power4.in' }, 44.42);
+  tl.fromTo('#stampWrap', { x: 0 }, { x: 8, duration: .05, yoyo: true, repeat: 5, ease: 'none' }, 44.58);
+  tl.to('#qstage', { opacity: 0, x: 220, duration: .45, ease: 'power2.in' }, 44.95);
+  tl.to('#srcI', { opacity: 0, duration: .3 }, 45.0);
+  return tl;
+}
+
+async function build() {
+  const j = u => fetch(u).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
+  const load = src => { const im = new Image(); im.src = src; return im.decode().then(() => im); };
+  const [meta, bin, land, countries, bd, mym, kase, tle] = await Promise.all([
+    j('assets/data/meta.json'), fetch('assets/data/fires.u16').then(r => r.arrayBuffer()), j('assets/data/land-110m.json'), j('assets/data/countries-50m.json'),
+    j('assets/data/bd_districts.geojson'), j('assets/data/mym_upazilas.geojson'), j('assets/data/firms_case.json'), fetch('assets/data/tle.txt').then(r => r.text())]);
+  META = meta; FIRES = new Uint16Array(bin); CASE = kase;
+  if (!FIRES.length) throw new Error('fires.u16 came back empty');
+  LAND = topojson.feature(land, land.objects.land); COUNTRIES = topojson.feature(countries, countries.objects.countries);
+  BD = bd; MYM = mym; BHALUKA = mym.features.find(f => f.properties.n === 'Bhaluka'); GRAT = d3.geoGraticule10();
+  [IMG.rangamati, IMG.z10, IMG.z12, IMG.bm] = await Promise.all(['assets/img/rangamati.jpg', 'assets/img/bhaluka_z10.jpg', 'assets/img/bhaluka_z12.jpg', 'assets/img/bluemarble_southasia.jpg'].map(load));
+  IMG.z10 = feather(IMG.z10, .07);
+  buildFireClouds(); buildOrbits(tle); buildTeam(); buildChart(); buildQuestion();
+  const raw = buildRawLine();
+  await document.fonts.load('600 40px "Anek Bangla"'); await document.fonts.load('700 40px "Anek Bangla"', 'ময়মনসিংহ');
+  await document.fonts.load('600 20px "IBM Plex Mono"'); await document.fonts.load('400 20px "IBM Plex Mono"'); await document.fonts.load('700 40px Caveat');
+  await new Promise(r => { if (earthTex.image) r(); else THREE.DefaultLoadingManager.onLoad = r; });
+  const tl = buildTimeline(raw);
+  window.__timelines["main"] = tl;
+  renderCanvases(0);
+  return true;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #rm-wrap { position: absolute; right: 24px; bottom: 94px; display: flex; gap: 21px; }
+        .rm-card { position: relative; width: 165px; height: 165px; padding: 10px; }
+        .rm-year { position: absolute; left: 10px; top: 8px; font-size: 27px; line-height: 1; font-style: italic; }
+        .rm-map { position: absolute; left: 9px; top: 42px; width: 146px; height: 77px; overflow: visible; }
+        .rm-val { position: absolute; left: 10px; bottom: 8px; font-size: 29px; line-height: 1; font-variant-numeric: tabular-nums; }
+        #rm-mark { position: absolute; left: 50%; top: -30px; font-family: var(--serif); font-size: 52px; color: #ff8d58; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 -1px 2px rgba(0, 0, 0, 0.9), 1px 0 2px rgba(0, 0, 0, 0.9), -1px 0 2px rgba(0, 0, 0, 0.9), 0 0 24px rgba(255, 122, 61, 0.6); }
+      </style>
+      <div id="rm-root" data-composition-id="s1b-reminder" data-width="1920" data-height="1080" data-layout-allow-overlap data-layout-allow-occlusion style="position:absolute;inset:0;overflow:hidden;opacity:0.58">
+        <div id="rm-wrap">
+          <div class="rm-card glass" id="rm-cardA" data-layout-allow-overlap data-layout-allow-occlusion>
+            <div class="serif rm-year" data-layout-allow-overlap data-layout-allow-occlusion style="color:var(--modis)">2010</div>
+            <svg class="rm-map" id="rm-mapA" viewBox="0 0 146 77"></svg>
+            <div class="serif rm-val" id="rm-valA" data-layout-allow-overlap data-layout-allow-occlusion style="color:var(--modis)">22.7</div>
+          </div>
+          <div class="rm-card glass" id="rm-cardB" data-layout-allow-overlap data-layout-allow-occlusion>
+            <div class="serif rm-year" data-layout-allow-overlap data-layout-allow-occlusion style="color:var(--alarm)">2016</div>
+            <svg class="rm-map" id="rm-mapB" viewBox="0 0 146 77"></svg>
+            <div class="serif rm-val" id="rm-valB" data-layout-allow-overlap data-layout-allow-occlusion style="color:rgb(255,75,73)">46.3</div>
+          </div>
+          <div id="rm-mark" data-layout-allow-occlusion>?</div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, tl = gsap.timeline({ paused: true });
+          var mapA = K.worldMap(document.getElementById("rm-mapA"), { w: 146, h: 77, stride: 6, r: 0.7 });
+          var mapB = K.worldMap(document.getElementById("rm-mapB"), { w: 146, h: 77, stride: 6, r: 0.7 });
+          K.worldFires(document.getElementById("rm-mapA"), mapA, 54, 2010, "#f2b862").forEach(function (d) { d.setAttribute("opacity", 1); });
+          K.worldFires(document.getElementById("rm-mapB"), mapB, 112, 2016, "#ff4a48").forEach(function (d) { d.setAttribute("opacity", 1); });
+          K.drive(tl, 21, function () {});
+          tl.fromTo("#rm-wrap", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 0);
+          tl.to("#rm-wrap", { opacity: 0, duration: 0.5, ease: "power1.in" }, 20.4);
+          window.__timelines["s1b-reminder"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

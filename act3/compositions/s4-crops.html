@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #s4-svg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #s4-copy { position: absolute; left: 1120px; top: 250px; width: 720px; }
+        .s4-big { font-size: 160px; line-height: 0.92; margin-top: 26px; }
+        .s4-big i { display: block; color: var(--ember); }
+        .s4-sub { font-size: 48px; color: var(--dim); margin-top: 18px; }
+        #s4-l1 { margin-top: 44px; display: flex; align-items: center; gap: 14px; color: var(--ink); }
+        .s4-sw { width: 22px; height: 3px; display: inline-block; background: var(--ember); box-shadow: 0 0 10px var(--ember); }
+        #s4-chip { position: absolute; left: 120px; top: 480px; width: 560px; white-space: normal; line-height: 2.1; }
+      </style>
+      <div id="s4-root" data-composition-id="s4-crops" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div class="scrim scrim-r" id="s4-scrim"></div>
+        <svg id="s4-svg" viewBox="0 0 1920 1080">
+          <defs><filter id="s4-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter></defs>
+        </svg>
+        <div id="s4-copy">
+          <div class="kick" id="s4-k">Extension 1 · crops · Bangladesh</div>
+          <div class="serif s4-big" id="s4-b"><i>8 weeks</i>= 50%</div>
+          <div class="serif s4-sub" id="s4-s">of the year's fire</div>
+          <div class="lab" id="s4-l1"><span class="s4-sw"></span>Apr–May · spring rice harvest</div>
+        </div>
+        <div class="lab" id="s4-chip">Fire calendar <b style="color:var(--ember)">×</b> crop calendar · <b>any crop, any country</b></div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, E = window.EARTH, OFF = 38, TAU = Math.PI * 2;
+          var tl = gsap.timeline({ paused: true });
+          var svg = document.getElementById("s4-svg");
+          var CEN = [90.3, 23.6];
+          // a dial drawn on the ground: radii in degrees, angle clockwise from north
+          function gp(T, c, r, a, sc) { var ll = E.offsetLL(c[0], c[1], r * sc * Math.sin(a), r * sc * Math.cos(a)); return E.project(T, ll[0], ll[1]); }
+          function arcPath(T, c, r0, r1, a0, a1, sc) {
+            var pts = [], n = Math.max(3, Math.ceil(((a1 - a0) / TAU) * 72)), vis = 1;
+            for (var i = 0; i <= n; i++) { var q = gp(T, c, r1, a0 + ((a1 - a0) * i) / n, sc); pts.push(q); vis = Math.min(vis, q[2]); }
+            for (var j = n; j >= 0; j--) { var q2 = gp(T, c, r0, a0 + ((a1 - a0) * j) / n, sc); pts.push(q2); vis = Math.min(vis, q2[2]); }
+            return vis < 0.5 ? "" : K.line(pts) + "Z";
+          }
+          var R0 = 1.35, R1 = 4.2;
+          function dial(shares, hot, faint) {
+            var g = K.svg("g", {}, svg), max = Math.max.apply(null, shares), w = [];
+            var rim = K.svg("path", { d: "", fill: "none", stroke: "rgba(243,238,228,0.35)", "stroke-width": 1 }, g);
+            var hub = K.svg("path", { d: "", fill: "rgba(0,0,0,0.55)", stroke: "rgba(243,238,228,0.3)", "stroke-width": 1 }, g);
+            shares.forEach(function (s, m) {
+              w.push({ el: K.svg("path", { d: "", fill: hot.indexOf(m) >= 0 ? "#ff7a3d" : faint ? "rgba(243,238,228,0.55)" : "rgba(243,238,228,0.8)", filter: hot.indexOf(m) >= 0 ? "url(#s4-glow)" : "" }, g), a0: (m / 12) * TAU + 0.025, a1: ((m + 1) / 12) * TAU - 0.025, len: (s / max) * (R1 - R0), hot: hot.indexOf(m) >= 0 });
+            });
+            return { g: g, w: w, rim: rim, hub: hub };
+          }
+          var shares = [4, 6, 10, 26, 24, 4, 2, 2, 2, 4, 8, 8];
+          var main = dial(shares, [3, 4]);
+          var MON = "JFMAMJJASOND", labs = [];
+          for (var m = 0; m < 12; m++) {
+            var t0 = K.svg("text", { "text-anchor": "middle", "font-family": "Instrument Sans", "font-weight": 600, "font-size": 17, "letter-spacing": "2", fill: m === 3 || m === 4 ? "#ffb38a" : "rgba(243,238,228,0.92)", stroke: "rgba(0,0,0,0.7)", "stroke-width": 4, "paint-order": "stroke" }, svg);
+            t0.textContent = MON[m]; labs.push(t0);
+          }
+          var ring = K.svg("path", { d: "", fill: "#ff7a3d", filter: "url(#s4-glow)" }, svg);
+          var hand = K.svg("line", { stroke: "#fff", "stroke-width": 2.5, "stroke-linecap": "round", filter: "url(#s4-glow)" }, svg);
+          var pct = K.svg("text", { "text-anchor": "middle", "font-family": "Instrument Serif", "font-size": 76, fill: "#f3eee4", stroke: "rgba(0,0,0,0.7)", "stroke-width": 4, "paint-order": "stroke" }, svg);
+          // rice stalk on the Apr–May slice
+          var rice = K.svg("g", { opacity: 0 }, svg), rg = K.svg("g", {}, rice);
+          K.svg("circle", { r: 34, fill: "rgba(0,0,0,0.6)", stroke: "#ff7a3d", "stroke-width": 1.5 }, rg);
+          K.svg("path", { d: "M-3 22 C -3 4, 1 -10, 10 -22", fill: "none", stroke: "#f2b862", "stroke-width": 3, "stroke-linecap": "round" }, rg);
+          [[-1, 7, -30], [2, -3, -35], [7, -13, -40], [-9, 9, 30], [-6, -1, 30], [-1, -12, 35]].forEach(function (q) {
+            K.svg("ellipse", { cx: q[0], cy: q[1], rx: 3.4, ry: 7, fill: "#f2b862", transform: "rotate(" + q[2] + " " + q[0] + " " + q[1] + ")" }, rg);
+          });
+          // copies over farm belts on other continents, each with its own harvest window
+          var FARMS = [[72.5, 31], [31, 30.5], [8, 12.8], [38.5, 9], [32, 49], [10.5, 45], [114, 35], [105.3, 11.4], [100.5, 15.5], [110, -7.2], [28, -14], [44.5, 33]];
+          var copies = FARMS.map(function (f, i) {
+            var hot = [(i * 5 + 2) % 12, (i * 5 + 3) % 12];
+            var d = dial(shares.map(function (_, mm) { return shares[(mm - hot[0] + 3 + 12) % 12]; }), hot, true);
+            d.c = f; return d;
+          });
+          function paintDial(T, d, c, sc, grow) {
+            d.rim.setAttribute("d", arcPath(T, c, R1 + 0.3, R1 + 0.36, 0, TAU, sc));
+            d.hub.setAttribute("d", arcPath(T, c, 0, R0 - 0.1, 0, TAU, sc));
+            d.w.forEach(function (w, m) {
+              var gl = grow ? grow(w, m) : 1;
+              w.el.setAttribute("d", gl > 0.01 ? arcPath(T, c, R0, R0 + w.len * gl, w.a0, w.a1, sc) : "");
+            });
+          }
+
+          K.drive(tl, 9, function (t) {
+            var T = t + OFF, sweep = K.inOut(K.p(t, 0.5, 4.2)) * TAU, sc = K.lerp(1, 0.85, K.inOut(K.p(t, 6.3, 7.2)));
+            main.g.setAttribute("opacity", K.p(t, 0.2, 0.7));
+            paintDial(T, main, CEN, sc, function (w) { return K.out(K.p(sweep, w.a0, w.a0 + 0.9)); });
+            main.w.forEach(function (w) { w.el.setAttribute("opacity", w.hot ? 1 : (1 - 0.45 * K.p(t, 4.3, 4.8)).toFixed(3)); });
+            var labO = K.p(t, 0.3, 0.8) * (1 - K.p(t, 6.3, 6.6));
+            labs.forEach(function (lb, i) {
+              var q = gp(T, CEN, R1 + 0.85, ((i + 0.5) / 12) * TAU, sc);
+              lb.setAttribute("x", q[0].toFixed(1)); lb.setAttribute("y", (q[1] + 6).toFixed(1)); lb.setAttribute("opacity", labO.toFixed(3));
+            });
+            var c0 = E.project(T, CEN[0], CEN[1]), hp = gp(T, CEN, R1 + 0.15, sweep, sc);
+            hand.setAttribute("x1", c0[0]); hand.setAttribute("y1", c0[1]); hand.setAttribute("x2", hp[0]); hand.setAttribute("y2", hp[1]);
+            hand.setAttribute("opacity", K.p(t, 0.4, 0.6) * (1 - K.p(t, 4.2, 4.5)));
+            var half = K.inOut(K.p(t, 4.4, 5.4)) * Math.PI;
+            ring.setAttribute("d", half > 0.01 ? arcPath(T, CEN, R0 - 0.5, R0 - 0.3, (3 / 12) * TAU, (3 / 12) * TAU + half, sc) : "");
+            pct.textContent = Math.round((half / Math.PI) * 50) + "%";
+            pct.setAttribute("x", c0[0]); pct.setAttribute("y", c0[1] + 26);
+            pct.setAttribute("opacity", K.p(t, 4.4, 4.6) * (1 - K.p(t, 6.3, 6.6)));
+            var rp = gp(T, CEN, R1 - 0.2, (4 / 12) * TAU, sc);
+            rice.setAttribute("transform", "translate(" + (rp[0] + 70).toFixed(1) + " " + (rp[1] - 30).toFixed(1) + ")");
+            rice.setAttribute("opacity", K.p(t, 5.3, 5.5) * (1 - K.p(t, 6.3, 6.6)));
+            copies.forEach(function (c, i) {
+              var s = K.out(K.p(t, 7.2 + i * 0.09, 7.6 + i * 0.09));
+              c.g.setAttribute("opacity", s > 0 ? Math.min(1, s * 2).toFixed(3) : 0);
+              if (s > 0) paintDial(T, c, c.c, 0.85 * K.lerp(0.4, 1, s));
+            });
+          });
+
+          tl.fromTo("#s4-root", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
+          tl.fromTo("#s4-k", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.3);
+          tl.fromTo("#s4-b", { opacity: 0, x: 40, filter: "blur(8px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.8, ease: "expo.out" }, 4.5);
+          tl.fromTo("#s4-s", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 4.8);
+          tl.fromTo("#s4-l1", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 5.3);
+          tl.to("#s4-copy", { opacity: 0, x: 30, duration: 0.4, ease: "power2.in" }, 6.1);
+          tl.to("#s4-scrim", { opacity: 0, duration: 0.6 }, 6.2);
+          tl.fromTo("#s4-chip", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 7.4);
+          tl.to("#s4-root", { opacity: 0, duration: 0.35 }, 8.65);
+          window.__timelines["s4-crops"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

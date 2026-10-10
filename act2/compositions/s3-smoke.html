@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #s3-kicker { position: absolute; left: 120px; top: 100px; z-index: 2; }
+        #s3-col { position: absolute; left: 112px; top: 160px; width: 760px; z-index: 2; }
+        .scrim { z-index: 1; }
+        #s3-counterGrp, #s3-modisGrp { position: absolute; left: 0; top: 0; width: 760px; }
+        #s3-num { font-size: 150px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); }
+        #s3-numlab { margin-top: 18px; max-width: 700px; }
+        #s3-modisWord { font-family: var(--serif); font-size: 130px; line-height: 1; color: var(--modis); }
+        #s3-cdwrap { display: flex; align-items: baseline; gap: 26px; }
+        #s3-cd { font-family: var(--mono); font-size: 150px; font-variant-numeric: tabular-nums; color: var(--alarm); text-shadow: 0 0 44px rgba(255, 74, 72, 0.5); }
+        #s3-modislab { margin-top: 18px; max-width: 720px; }
+        .s3-smk { position: absolute; width: 170px; height: 170px; border-radius: 50%; filter: blur(22px); background: radial-gradient(circle, rgba(224, 216, 202, 0.55), rgba(224, 216, 202, 0) 70%); pointer-events: none; }
+      </style>
+      <div id="s3-root" data-composition-id="s3-smoke" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div class="scrim scrim-l"></div>
+        <div class="kick" id="s3-kicker">The scale · landscape fire smoke</div>
+        <div id="s3-smokeLayer"></div>
+        <div id="s3-col">
+          <div id="s3-counterGrp">
+            <div id="s3-num">0</div>
+            <div class="lab" id="s3-numlab">~1.5 million deaths a year (Lancet, 2024)</div>
+          </div>
+          <div id="s3-modisGrp" style="opacity:0">
+            <div id="s3-cdwrap"><span id="s3-modisWord">MODIS</span><span id="s3-cd">6</span></div>
+            <div class="lab" id="s3-modislab" data-layout-allow-occlusion>MODIS missions shutting down: final shutdowns planned late 2026 – early 2027 (NASA)</div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, tl = gsap.timeline({ paused: true });
+          var layer = document.getElementById("s3-smokeLayer");
+          var regions = K.FIRE_REGIONS, PARTS = 3, smk = [];
+          regions.forEach(function (r, ri) {
+            for (var p = 0; p < PARTS; p++) {
+              var el = document.createElement("div");
+              el.className = "s3-smk";
+              layer.appendChild(el);
+              smk.push({ el: el, lon: r[1], lat: r[2], phase: ri * 1.7 + p * 0.9, speed: 0.07 + p * 0.015 });
+            }
+          });
+          var numEl = document.getElementById("s3-num"), cdEl = document.getElementById("s3-cd");
+
+          K.drive(tl, 13, function (t) {
+            smk.forEach(function (s) {
+              var pr = window.EARTH.project(t, s.lon, s.lat, 0.015);
+              var cyc = ((t * s.speed + s.phase) % 1 + 1) % 1;
+              var rise = cyc * 150, fade = Math.sin(Math.PI * cyc);
+              s.el.style.left = (pr[0] - 85 + Math.sin(t * 0.6 + s.phase) * 22) + "px";
+              s.el.style.top = (pr[1] - 85 - rise) + "px";
+              s.el.style.opacity = (pr[2] * fade * 0.6).toFixed(3);
+            });
+            if (t < 6.1) numEl.textContent = Math.round(1500000 * K.out(K.p(t, 1.0, 5.6))).toLocaleString("en-US");
+            // countdown digit over MODIS: 6 -> 1, the gap between ticks shrinking
+            var steps = [7.2, 8.15, 9.0, 9.75, 10.4, 10.95], n = 6;
+            for (var i = 0; i < steps.length; i++) if (t >= steps[i]) n = 6 - i;
+            cdEl.textContent = n;
+          });
+
+          tl.fromTo("#s3-kicker", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.15);
+          tl.fromTo("#s3-counterGrp", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.5);
+          tl.to("#s3-counterGrp", { opacity: 0, duration: 0.4, ease: "power1.in" }, 6.3);
+          tl.fromTo("#s3-modisGrp", { y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 6.6);
+
+          // countdown over MODIS: a scale-pop on each tick, the gap shrinking (speeding up)
+          [7.2, 8.15, 9.0, 9.75, 10.4, 10.95].forEach(function (t0) {
+            tl.fromTo("#s3-cd", { scale: 1.35 }, { scale: 1, duration: 0.16, ease: "power3.out" }, t0);
+          });
+          window.__timelines["s3-smoke"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

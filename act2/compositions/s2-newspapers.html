@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #n2-kicker { position: absolute; left: 120px; top: 100px; }
+        #n2-desk { position: absolute; inset: 0; background: radial-gradient(ellipse 1400px 900px at 50% 54%, rgba(20, 16, 12, 0.55) 0%, rgba(0, 0, 0, 0.88) 72%); }
+        .n2-wrap { position: absolute; }
+        .n2-card { width: 480px; height: 300px; background: linear-gradient(160deg, #ece1c4, #d8c89e); border-radius: 2px; box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6), inset 0 0 50px rgba(120, 95, 55, 0.22); padding: 22px 24px; color: #241f1a; position: relative; overflow: hidden; }
+        .n2-pub { font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.17em; text-transform: uppercase; color: #433728; display: flex; justify-content: space-between; border-bottom: 2px solid #241f1a; padding-bottom: 6px; margin-bottom: 14px; }
+        .n2-region { font-family: var(--sans); font-weight: 700; font-size: 12px; letter-spacing: 0.2em; color: #5a301c; margin-bottom: 12px; }
+        .n2-hl { font-family: var(--serif); font-size: 28px; line-height: 1.18; color: #1d1812; max-width: 290px; }
+        .n2-photo { position: absolute; right: 20px; bottom: 18px; width: 150px; height: 112px; background: #26211a; background-image: radial-gradient(circle, #5c4f3d 1.6px, transparent 1.7px); background-size: 7px 7px; }
+      </style>
+      <div id="n2-root" data-composition-id="s2-newspapers" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div id="n2-desk"></div>
+        <div class="kick" id="n2-kicker">No warning · unusual fire seasons</div>
+        <div class="n2-wrap" id="n2-w0" style="left:560px;top:300px"><div class="n2-card" id="n2-c0">
+          <div class="n2-pub"><span>Prothom Alo</span><span>25 Mar 2025</span></div>
+          <div class="n2-region">Bhaluka, Mymensingh</div>
+          <div class="n2-hl">Reserve forest catches fire again within days</div>
+          <div class="n2-photo"></div>
+        </div></div>
+        <div class="n2-wrap" id="n2-w1" style="left:1020px;top:260px"><div class="n2-card" id="n2-c1">
+          <div class="n2-pub"><span>The Daily Star</span><span>2026</span></div>
+          <div class="n2-region">Tangail</div>
+          <div class="n2-hl">Farmers protest kiln emissions damaging Boro paddy</div>
+          <div class="n2-photo"></div>
+        </div></div>
+        <div class="n2-wrap" id="n2-w2" style="left:780px;top:480px"><div class="n2-card" id="n2-c2">
+          <div class="n2-pub"><span>The News Minute</span><span>11 Mar 2018</span></div>
+          <div class="n2-region">Kurangani, India</div>
+          <div class="n2-hl">23 trekkers die as forest fire traps trekking group</div>
+          <div class="n2-photo"></div>
+        </div></div>
+        <div class="n2-wrap" id="n2-w3" style="left:1240px;top:420px"><div class="n2-card" id="n2-c3">
+          <div class="n2-pub"><span>Peoples Dispatch</span><span>26 Jul 2023</span></div>
+          <div class="n2-region">Algeria</div>
+          <div class="n2-hl">Unprecedented wildfires kill at least 34, thousands displaced</div>
+          <div class="n2-photo"></div>
+        </div></div>
+        <div class="n2-wrap" id="n2-w4" style="left:660px;top:620px"><div class="n2-card" id="n2-c4">
+          <div class="n2-pub"><span>The Moscow Times</span><span>17 Aug 2021</span></div>
+          <div class="n2-region">Siberia, Russia</div>
+          <div class="n2-hl">Russia's 2021 wildfires now largest in recorded history</div>
+          <div class="n2-photo"></div>
+        </div></div>
+        <div class="n2-wrap" id="n2-w5" style="left:1060px;top:600px"><div class="n2-card" id="n2-c5">
+          <div class="n2-pub"><span>Yahoo News</span><span>2023</span></div>
+          <div class="n2-region">Canada</div>
+          <div class="n2-hl">"Literally off the charts": Canada's fire season sets records</div>
+          <div class="n2-photo"></div>
+        </div></div>
+      </div>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          // quickening pile-up: six cards, the gap between drops shrinks each time
+          var drops = [0.3, 1.35, 2.27, 3.05, 3.69, 4.19];
+          var rot = [-6, 4, -3, 6, 3, -5];
+          drops.forEach(function (t0, i) {
+            var fs = 0.9 + i * 0.018, fb = "brightness(" + (0.76 + i * 0.045).toFixed(2) + ")";
+            tl.fromTo("#n2-c" + i, { y: -640, x: (i % 2 ? 60 : -60), rotation: rot[i] * 2.4, scale: 1.2, opacity: 0, filter: "brightness(1.3)" },
+              { y: 0, x: 0, rotation: rot[i], scale: fs, opacity: 1, filter: fb, duration: 0.5, ease: "back.out(1.5)" }, t0);
+            tl.fromTo("#n2-root", { x: 0 }, { x: i % 2 ? 4 : -4, duration: 0.045, yoyo: true, repeat: 3, ease: "none" }, t0 + 0.32);
+          });
+          tl.fromTo("#n2-desk", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0);
+          tl.fromTo("#n2-kicker", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.1);
+          tl.to("#n2-root", { opacity: 0, duration: 0.45, ease: "power1.in" }, 6.5);
+          window.__timelines["s2-newspapers"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

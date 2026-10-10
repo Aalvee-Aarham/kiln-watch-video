@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #q1-kicker { position: absolute; left: 120px; top: 100px; }
+        #q1-head { position: absolute; left: 0; right: 0; top: 140px; text-align: center; font-size: 72px; }
+        #q1-group { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; gap: 70px; }
+        .q1-card { position: relative; width: 560px; height: 560px; padding: 30px; }
+        .q1-year { position: absolute; left: 38px; top: 26px; font-size: 92px; line-height: 1; }
+        .q1-map { position: absolute; left: 36px; top: 140px; width: 488px; height: 256px; overflow: visible; }
+        .q1-val { position: absolute; left: 38px; bottom: 96px; font-size: 96px; line-height: 1; font-variant-numeric: tabular-nums; }
+        .q1-tag { position: absolute; left: 40px; bottom: 36px; }
+        #q1-cd { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; justify-content: center; align-items: center; font-size: 460px; line-height: 1; color: var(--alarm); font-variant-numeric: tabular-nums; text-shadow: 0 0 90px rgba(255, 74, 72, 0.5); }
+        #q1-mark { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; justify-content: center; align-items: center; font-size: 380px; line-height: 1; color: var(--ember); font-family: var(--serif); text-shadow: 0 0 70px rgba(255, 122, 61, 0.55); }
+      </style>
+      <div id="q1-root" data-composition-id="s1-quiz" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div class="scrim scrim-b"></div>
+        <div class="kick" id="q1-kicker">Viewer challenge · raw record</div>
+        <div class="serif" id="q1-head">Which burned more?</div>
+        <div id="q1-group" data-layout-allow-overlap data-layout-allow-overflow>
+          <div class="q1-card glass" id="q1-cardA" data-layout-allow-overlap>
+            <div class="serif q1-year" data-layout-allow-overlap><i data-layout-allow-overlap>2010</i></div>
+            <svg class="q1-map" id="q1-mapA" viewBox="0 0 488 256"></svg>
+            <div class="serif q1-val" id="q1-valA" data-layout-allow-overlap style="color:var(--modis)">0.0</div>
+            <div class="lab q1-tag" data-layout-allow-overlap>World fire record</div>
+          </div>
+          <div class="q1-card glass" id="q1-cardB" data-layout-allow-overlap>
+            <div class="serif q1-year" data-layout-allow-overlap><i data-layout-allow-overlap>2016</i></div>
+            <svg class="q1-map" id="q1-mapB" viewBox="0 0 488 256"></svg>
+            <div class="serif q1-val" id="q1-valB" data-layout-allow-overlap style="color:var(--alarm)">0.0</div>
+            <div class="lab q1-tag" data-layout-allow-overlap>World fire record</div>
+          </div>
+        </div>
+        <div id="q1-cd" data-layout-allow-overlap></div>
+        <div id="q1-mark" data-layout-allow-overlap data-layout-allow-overflow>?</div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, tl = gsap.timeline({ paused: true });
+          var mapA = K.worldMap(document.getElementById("q1-mapA"), { w: 488, h: 256 });
+          var mapB = K.worldMap(document.getElementById("q1-mapB"), { w: 488, h: 256 });
+          var firesA = K.worldFires(document.getElementById("q1-mapA"), mapA, 54, 2010, "#f2b862");
+          var firesB = K.worldFires(document.getElementById("q1-mapB"), mapB, 112, 2016, "#ff4a48");
+          var valA = document.getElementById("q1-valA"), valB = document.getElementById("q1-valB"), cd = document.getElementById("q1-cd");
+
+          K.drive(tl, 10, function (t) {
+            // the two totals count up together, 1.3 -> 2.6
+            var c = K.out(K.p(t, 1.3, 2.6));
+            valA.textContent = (22.7 * c).toFixed(1);
+            valB.textContent = (46.3 * c).toFixed(1);
+            firesA.forEach(function (d, i) { d.setAttribute("opacity", i < firesA.length * c ? 1 : 0); });
+            firesB.forEach(function (d, i) { d.setAttribute("opacity", i < firesB.length * c ? 1 : 0); });
+            // countdown digits: 3 (1.6-2.6) 2 (2.6-3.6) 1 (3.6-4.6)
+            var n = t < 1.6 ? null : t < 2.6 ? 3 : t < 3.6 ? 2 : t < 4.6 ? 1 : null;
+            cd.textContent = n || "";
+          });
+
+          tl.fromTo("#q1-kicker", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.15);
+          tl.fromTo("#q1-head", { opacity: 0, y: -14, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power3.out" }, 0.35);
+          tl.fromTo("#q1-cardA", { opacity: 0, x: -140, rotation: -3 }, { opacity: 1, x: 0, rotation: 0, duration: 0.8, ease: "expo.out" }, 0.35);
+          tl.fromTo("#q1-cardB", { opacity: 0, x: 140, rotation: 3 }, { opacity: 1, x: 0, rotation: 0, duration: 0.8, ease: "expo.out" }, 0.45);
+
+          // countdown digit punches
+          [1.6, 2.6, 3.6].forEach(function (t0) {
+            tl.fromTo("#q1-cd", { scale: 1.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: "power4.out" }, t0);
+          });
+          tl.to("#q1-cd", { opacity: 0, duration: 0.25, ease: "power1.in" }, 4.6);
+          tl.to("#q1-head", { opacity: 0.35, duration: 0.3 }, 4.6);
+
+          // hard stop: the "?" stamps down over the frozen maps
+          tl.to(["#q1-cardA", "#q1-cardB"], { filter: "grayscale(0.4) brightness(0.65)", duration: 0.2 }, 4.9);
+          tl.fromTo("#q1-mark", { opacity: 0, scale: 2.6, rotation: -10 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.18, ease: "power4.in" }, 5.0);
+          tl.fromTo("#q1-root", { x: 0 }, { x: 6, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 5.0);
+
+          // park: the whole challenge shrinks into the bottom-right corner, where it waits
+          tl.to("#q1-kicker", { opacity: 0, duration: 0.3 }, 5.5);
+          tl.to("#q1-head", { opacity: 0, duration: 0.3 }, 5.5);
+          tl.to("#q1-group", { scale: 0.3, x: 760, y: 360, duration: 1.1, ease: "power3.inOut" }, 5.7);
+          tl.to("#q1-mark", { scale: 0.32, x: 760, y: 280, duration: 1.1, ease: "power3.inOut" }, 5.7);
+          tl.to(["#q1-group", "#q1-mark"], { opacity: 0.6, duration: 0.6 }, 6.0);
+          tl.to("#q1-root", { opacity: 0, duration: 0.5, ease: "power1.in" }, 9.4);
+
+          window.__timelines["s1-quiz"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

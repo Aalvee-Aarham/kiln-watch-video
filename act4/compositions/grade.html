@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #gr-root { position: absolute; inset: 0; pointer-events: none; }
+        #gr-vig { position: absolute; inset: 0; background: radial-gradient(120% 95% at 50% 48%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%); }
+        #gr-grain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.09; mix-blend-mode: overlay; }
+        <!-- thinner than act3's 104px bars: act4's existing panel/headline layout (not originally
+             designed around a letterboxed safe zone) places several elements close to the top/bottom
+             edge (#a4-yr, #a4-mark, #a4-fcal, #a4-nasa) -- 36px keeps the cinematic crop without
+             clipping them. -->
+        .gr-bar { position: absolute; left: 0; right: 0; height: 36px; background: #000; }
+        #gr-top { top: 0; transform-origin: 50% 0; }
+        #gr-bot { bottom: 0; transform-origin: 50% 100%; }
+      </style>
+      <!-- Quieter than act3's grade.html: same grain + vignette + letterbox, but no numbered chapter
+           labels -- act4 packs ~10 beats into 74s and per-section chapter cards would feel busy. -->
+      <div id="gr-root" data-composition-id="grade" data-width="1920" data-height="1080">
+        <div id="gr-vig"></div>
+        <canvas id="gr-grain" width="960" height="540"></canvas>
+        <div class="gr-bar" id="gr-top"></div>
+        <div class="gr-bar" id="gr-bot"></div>
+      </div>
+      <script>
+        (function () {
+          var K = window.KIT, tl = gsap.timeline({ paused: true });
+          // grain: four seeded noise tiles, a new one every film frame (24 fps cadence)
+          var cv = document.getElementById("gr-grain"), ctx = cv.getContext("2d"), tiles = [], rnd = K.rng(4242);
+          for (var k = 0; k < 4; k++) {
+            var c = document.createElement("canvas"); c.width = c.height = 256;
+            var g = c.getContext("2d"), im = g.createImageData(256, 256);
+            for (var i = 0; i < im.data.length; i += 4) { var v = (rnd() + rnd() + rnd()) * 85; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+            g.putImageData(im, 0, 0);
+            tiles.push(ctx.createPattern(c, "repeat"));
+          }
+          K.drive(tl, 74, function (t) {
+            var f = Math.floor(t * 24);
+            ctx.save();
+            ctx.fillStyle = tiles[f % 4];
+            ctx.translate(-((f * 73) % 256), -((f * 151) % 256));
+            ctx.fillRect(0, 0, 960 + 256, 540 + 256);
+            ctx.restore();
+          });
+          // letterbox closes in once at the start and stays -- this is the last act, so unlike act3
+          // (which opens the bars again at its very end to hand off to act4) there's no act5 to hand
+          // off to: the piece already ends on its own hard cut to black.
+          tl.fromTo(".gr-bar", { scaleY: 0 }, { scaleY: 1, duration: 1.0, ease: "power3.inOut" }, 0);
+          window.__timelines["grade"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
