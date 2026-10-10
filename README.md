@@ -34,7 +34,7 @@ bash merge.sh
 
 Preview / edit live: `npm run dev` inside an act folder. Lint after edits: `npm run check`.
 
-**Rule (see `AGENTS.md`): preview in Chrome and approve every change before rendering. Rendering is slow.**
+**⚠️ Rendering takes a long time, so watch the preview first.** Open the preview link in Chrome, watch the whole video, check every change, and render only once you approve them all. AI agents follow this rule automatically (see `AGENTS.md`).
 
 ## Editing (adding footage, swapping a scene)
 
