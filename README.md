@@ -28,7 +28,7 @@ cd kiln-watch-video
 (cd act3 && npm run render -- -o renders/act3-final.mp4)
 (cd act4 && npm run render -- -o renders/act4-final.mp4)
 
-# stitch — edit the FFDIR line in merge.sh to your ffmpeg location first
+# stitch (needs ffmpeg on PATH, or FFMPEG=/path/to/ffmpeg)
 bash merge.sh
 ```
 
@@ -45,4 +45,4 @@ Easiest path: open the repo in Claude Code (each act has `CLAUDE.md` / `AGENTS.m
 ## Notes
 
 - Narration audio for `kiln-watch-full-narrated.mp4` is not in this repo — the act renders are music + SFX only.
-- `merge.sh` has a hard-coded Windows ffmpeg path; change `FFDIR` (or just use `ffmpeg` on PATH).
+- `merge.sh` uses `ffmpeg` from PATH. If yours is installed somewhere else: `FFMPEG=/path/to/ffmpeg bash merge.sh`.
