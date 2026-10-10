@@ -34,6 +34,8 @@ bash merge.sh
 
 Preview / edit live: `npm run dev` inside an act folder. Lint after edits: `npm run check`.
 
+**Rule (see `AGENTS.md`): preview in Chrome and approve every change before rendering. Rendering is slow.**
+
 ## Editing (adding footage, swapping a scene)
 
 Each scene is a sub-composition in `<act>/compositions/*.html`, wired into `<act>/index.html` with `data-start` / duration attributes. To drop footage into a scene, put the file in `<act>/assets/` and add a `<video class="clip" data-start=… >` element; to replace an animated scene, swap its host div for the video. The script timestamps in `kiln-watch-pitch-v7.md` are locked — keep durations the same so the acts still line up.
