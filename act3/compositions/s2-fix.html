@@ -1,6 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head><meta charset="UTF-8" /></head>
+  <head><meta charset="UTF-8"></head>
   <body>
     <template>
       <style>
@@ -46,49 +46,49 @@
         #s2-pctfill { display: block; width: 100%; height: 100%; background: var(--ember); box-shadow: 0 0 14px var(--ember); transform-origin: 0 50%; }
         #s2-ccap { position: absolute; left: 0; top: 430px; color: var(--ink); }
       </style>
-      <div id="s2-root" data-composition-id="s2-fix" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
-        <div class="scrim scrim-r" id="s2-scrim"></div>
-        <svg id="s2-svg" viewBox="0 0 1920 1080">
-          <defs>
-            <clipPath id="s2-clip"><path id="s2-clipp" d="" /></clipPath>
-            <filter id="s2-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+      <div data-hf-id="hf-ozjr" id="s2-root" data-composition-id="s2-fix" data-width="1920" data-height="1080" style="position:absolute;inset:0;overflow:hidden">
+        <div data-hf-id="hf-ye95" class="scrim scrim-r" id="s2-scrim"></div>
+        <svg data-hf-id="hf-5eji" id="s2-svg" viewBox="0 0 1920 1080">
+          <defs data-hf-id="hf-mh0t">
+            <clippath data-hf-id="hf-80j9" id="s2-clip"><path data-hf-id="hf-krfe" id="s2-clipp" d="" /></clippath>
+            <filter data-hf-id="hf-sbdv" id="s2-glow" x="-50%" y="-50%" width="200%" height="200%"><fegaussianblur data-hf-id="hf-v0pn" stdDeviation="3" result="b" /><femerge data-hf-id="hf-zn2o"><femergenode data-hf-id="hf-jge3" in="b" /><femergenode data-hf-id="hf-cmaw" in="SourceGraphic" /></femerge></filter>
           </defs>
         </svg>
-        <div id="s2-steps">
-          <div class="s2-step" id="s2-st1"><i>1</i>Match</div><span class="rule"></span>
-          <div class="s2-step" id="s2-st2"><i>2</i>Convert</div><span class="rule"></span>
-          <div class="s2-step" id="s2-st3"><i>3</i>Clear</div>
+        <div data-hf-id="hf-tsdo" id="s2-steps">
+          <div data-hf-id="hf-8tbn" class="s2-step" id="s2-st1"><i data-hf-id="hf-943b">1</i>Match</div><span data-hf-id="hf-6o6j" class="rule"></span>
+          <div data-hf-id="hf-lyok" class="s2-step" id="s2-st2"><i data-hf-id="hf-8psa">2</i>Convert</div><span data-hf-id="hf-424r" class="rule"></span>
+          <div data-hf-id="hf-k9ol" class="s2-step" id="s2-st3"><i data-hf-id="hf-8bh9">3</i>Clear</div>
         </div>
 
-        <div class="s2-panel" id="s2-p1">
-          <div class="lab" id="s2-chip1"><b>Same place</b> · <b>same day</b> · both overpass ~1:30 pm</div>
-          <div id="s2-px"></div>
-          <svg id="s2-pxsvg" viewBox="0 0 330 330"></svg>
-          <div class="lab" id="s2-mlab">MODIS · 1 km pixel</div>
-          <div class="lab" id="s2-vlab">VIIRS · 375 m pixels</div>
-          <div id="s2-eq">
-            <div class="serif s2-n" style="color:var(--viirs)">3 fires</div>
-            <div class="lab s2-eqlab">seen by VIIRS</div>
-            <div class="serif s2-n" style="color:var(--modis)">1 fire</div>
-            <div class="lab s2-eqlab">seen by MODIS</div>
+        <div data-hf-id="hf-lia1" class="s2-panel" id="s2-p1">
+          <div data-hf-id="hf-1bet" class="lab" id="s2-chip1"><b data-hf-id="hf-xdf4">Same place</b> · <b data-hf-id="hf-ym8p">same day</b> · both overpass ~1:30 pm</div>
+          <div data-hf-id="hf-buuv" id="s2-px"></div>
+          <svg data-hf-id="hf-ofrp" id="s2-pxsvg" viewBox="0 0 330 330" />
+          <div data-hf-id="hf-pjp5" class="lab" id="s2-mlab">MODIS · 1 km pixel</div>
+          <div data-hf-id="hf-ljhz" class="lab" id="s2-vlab">VIIRS · 375 m pixels</div>
+          <div data-hf-id="hf-0w9d" id="s2-eq">
+            <div data-hf-id="hf-v8lf" class="serif s2-n" style="color:var(--viirs)">3 fires</div>
+            <div data-hf-id="hf-x0hb" class="lab s2-eqlab">seen by VIIRS</div>
+            <div data-hf-id="hf-uwhz" class="serif s2-n" style="color:var(--modis)">1 fire</div>
+            <div data-hf-id="hf-i9es" class="lab s2-eqlab">seen by MODIS</div>
           </div>
         </div>
 
-        <div id="s2-p2">
-          <div id="s2-stage">
-            <div class="lab" id="s2-chip2">Exchange rate · <b style="color:var(--ember)">VIIRS fires per MODIS fire</b></div>
-            <div class="s2-head lab"><span style="width:456px">Region</span><span style="width:152px">Month</span><span style="width:228px">Pass</span><span>Rate</span></div>
-            <div id="s2-rows" style="position:relative"><div id="s2-hl"></div></div>
+        <div data-hf-id="hf-4n19" id="s2-p2">
+          <div data-hf-id="hf-pmtr" id="s2-stage">
+            <div data-hf-id="hf-tj0d" class="lab" id="s2-chip2">Exchange rate · <b data-hf-id="hf-35ov" style="color:var(--ember)">VIIRS fires per MODIS fire</b></div>
+            <div data-hf-id="hf-yzeb" class="s2-head lab"><span data-hf-id="hf-kaxb" style="width:456px">Region</span><span data-hf-id="hf-9xcc" style="width:152px">Month</span><span data-hf-id="hf-p19f" style="width:228px">Pass</span><span data-hf-id="hf-rvbn">Rate</span></div>
+            <div data-hf-id="hf-0k8t" id="s2-rows" style="position:relative"><div data-hf-id="hf-25zf" id="s2-hl"></div></div>
           </div>
-          <div class="serif" id="s2-rate">Bangladesh: <span class="v">3 VIIRS</span> <span class="a">≈</span> <span class="m">1 MODIS</span></div>
+          <div data-hf-id="hf-yf2m" class="serif" id="s2-rate">Bangladesh: <span data-hf-id="hf-b85l" class="v">3 VIIRS</span> <span data-hf-id="hf-d3l6" class="a">≈</span> <span data-hf-id="hf-0y75" class="m">1 MODIS</span></div>
         </div>
 
-        <div class="s2-panel" id="s2-p3">
-          <div class="lab" id="s2-chip3">A cloudy day <b style="color:var(--ember)">≠</b> a fire-free day</div>
-          <div class="lab" id="s2-clab">Cloud-free land</div>
-          <div class="serif" id="s2-pct">38%</div>
-          <div id="s2-pctbar"><span id="s2-pctfill"></span></div>
-          <div class="lab" id="s2-ccap">Fire counts corrected for cloud cover</div>
+        <div data-hf-id="hf-tei3" class="s2-panel" id="s2-p3">
+          <div data-hf-id="hf-4yi3" class="lab" id="s2-chip3">A cloudy day <b data-hf-id="hf-h060" style="color:var(--ember)">≠</b> a fire-free day</div>
+          <div data-hf-id="hf-ofuw" class="lab" id="s2-clab">Cloud-free land</div>
+          <div data-hf-id="hf-fc72" class="serif" id="s2-pct">38%</div>
+          <div data-hf-id="hf-ln8f" id="s2-pctbar"><span data-hf-id="hf-nyek" id="s2-pctfill"></span></div>
+          <div data-hf-id="hf-dmue" class="lab" id="s2-ccap">Fire counts corrected for cloud cover</div>
         </div>
       </div>
       <script>

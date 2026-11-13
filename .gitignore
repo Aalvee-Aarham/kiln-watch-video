@@ -3,3 +3,7 @@
 node_modules/
 .claude/
 .thumbnails/
+renders/
+.waveform-cache/
+**/.hyperframes/preview/
+**/snapshots/_*/

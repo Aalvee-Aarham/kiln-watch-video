@@ -157,17 +157,38 @@ function reverb(inp, spread) {
 }
 const rl = reverb(wet[0], 0), rr = reverb(wet[1], 23);
 
-// ---- mix, soft-limit, hard cut at 73.9 s, write 16-bit stereo WAV
-const out = Buffer.alloc(44 + N * 4);
-out.write("RIFF", 0); out.writeUInt32LE(36 + N * 4, 4); out.write("WAVEfmt ", 8);
+// ---- mix, soft-limit, hard cut at 73.9 s
+const ML = new Float32Array(N), MR = new Float32Array(N), cut = Math.floor(73.9 * SR);
+for (let n = 0; n < cut; n++) {
+  ML[n] = Math.tanh((dry[0][n] + wet[0][n] * 0.35 + rl[n] * 2.2) * 2.4) * 0.9;
+  MR[n] = Math.tanh((dry[1][n] + wet[1][n] * 0.35 + rr[n] * 2.2) * 2.4) * 0.9;
+}
+// v8 cut: the cues above stay timed on the original 74 s act; the effort strip (41-46) is
+// spliced out here, in step with ACT_CUTS in compositions/act4.html.
+// Kept source ranges, joined with a 0.25 s equal-power crossfade: 0-41, 46-74 -> 69 s.
+const KEEP = [[0, 41], [46, 74]], XF = Math.floor(0.25 * SR);
+const OUTN = KEEP.reduce((n, [a, b]) => n + Math.round((b - a) * SR), 0);
+const L = new Float32Array(OUTN), R = new Float32Array(OUTN);
+let o = 0;
+KEEP.forEach(([a, b], k) => {
+  const s0 = Math.round(a * SR), len = Math.round((b - a) * SR);
+  for (let i = 0; i < len; i++) {
+    const fi = k > 0 && i < XF ? Math.sin((i / XF) * Math.PI / 2) : 1; // this range fades in over the join
+    L[o + i] += ML[s0 + i] * fi; R[o + i] += MR[s0 + i] * fi;
+  }
+  if (k > 0) for (let i = 0; i < XF; i++) { // the previous range rings on past its end, fading out
+    const fo = Math.cos((i / XF) * Math.PI / 2), src = Math.round(KEEP[k - 1][1] * SR) + i;
+    L[o + i] += ML[src] * fo; R[o + i] += MR[src] * fo;
+  }
+  o += len;
+});
+const out = Buffer.alloc(44 + OUTN * 4);
+out.write("RIFF", 0); out.writeUInt32LE(36 + OUTN * 4, 4); out.write("WAVEfmt ", 8);
 out.writeUInt32LE(16, 16); out.writeUInt16LE(1, 20); out.writeUInt16LE(2, 22); out.writeUInt32LE(SR, 24);
-out.writeUInt32LE(SR * 4, 28); out.writeUInt16LE(4, 32); out.writeUInt16LE(16, 34); out.write("data", 36); out.writeUInt32LE(N * 4, 40);
-const cut = Math.floor(73.9 * SR);
+out.writeUInt32LE(SR * 4, 28); out.writeUInt16LE(4, 32); out.writeUInt16LE(16, 34); out.write("data", 36); out.writeUInt32LE(OUTN * 4, 40);
 let peak = 0;
-for (let n = 0; n < N; n++) {
-  const g = n < cut ? 1 : 0;
-  const l = Math.tanh((dry[0][n] + wet[0][n] * 0.35 + rl[n] * 2.2) * 2.4) * 0.9 * g;
-  const r = Math.tanh((dry[1][n] + wet[1][n] * 0.35 + rr[n] * 2.2) * 2.4) * 0.9 * g;
+for (let n = 0; n < OUTN; n++) {
+  const l = Math.max(-1, Math.min(1, L[n])), r = Math.max(-1, Math.min(1, R[n]));
   peak = Math.max(peak, Math.abs(l), Math.abs(r));
   out.writeInt16LE(Math.round(l * 32767), 44 + n * 4); out.writeInt16LE(Math.round(r * 32767), 46 + n * 4);
 }

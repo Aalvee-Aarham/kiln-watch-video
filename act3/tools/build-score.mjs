@@ -2,7 +2,7 @@
 // Retime cues here, then: node tools/build-score.mjs
 import { writeFileSync } from "node:fs";
 
-const SR = 48000, LEN = 77, N = SR * LEN, TAU = 2 * Math.PI;
+const SR = 48000, LEN = 38, N = SR * LEN, TAU = 2 * Math.PI;
 const dry = [new Float32Array(N), new Float32Array(N)]; // straight to the mix
 const wet = [new Float32Array(N), new Float32Array(N)]; // through the reverb
 let seed = 11;
@@ -121,43 +121,9 @@ whoosh(33.55, 0.6, 0.3);
 arp(33.8, 36.0, F, 0.375, 0.035);
 thud(36.2, 0.5, 58); click(36.2, 0.35);
 
-// S4 · crops 38-47: a lighter rhythm; a tick as the hand passes each month; a soft fill as the band fills
-pad(38.1, 5.4, F, 0.035, 1200); sub(38.1, 5.8, 41, 0.035);
-const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
-for (let m = 1; m <= 12; m++) { let lo = 0, hi = 1; for (let k = 0; k < 30; k++) { const mid = (lo + hi) / 2; io(mid) < m / 12 ? (lo = mid) : (hi = mid); } tick(38.5 + lo * 3.7, 0.09, 1500, 0.1); }
-for (let t = 38.5; t < 44.2; t += 0.375) piano(t, [77, 72, 69, 72][Math.round((t - 38.5) / 0.375) % 4], 0.035, 0.25);
-filtNoise(42.4, 1.1, 0.18, 400, 1700, (p) => Math.sin(Math.PI * p), 0, 0.5); pad(42.4, 1.6, [65, 69, 72], 0.03, 2400);
-pop(43.3, 0.14, 0.3);
-whoosh(44.3, 1.2, 0.32); fall(44.4, 1.4, 0.18);
-pad(44.6, 2.6, C, 0.035, 900);
-for (let i = 0; i < 12; i++) pop(45.2 + i * 0.09, 0.06, rnd() * 1.2 - 0.6);
-whoosh(46.9, 0.9, 0.22);
+// (v8: both extensions -- crops and kilns -- and the old chat demo were cut; the live site demo follows)
+rise(36.6, 1.4, 0.1); // lift into the live demo
 
-// S5 · kilns 47-58: one held note while detections fall; the switch; a soft pulse on each winter
-pad(47.2, 4.8, [50, 62], 0.05, 500); sub(47.2, 5.0, 38, 0.04);
-for (let i = 0; i < 40; i++) tick(48.5 + i * 0.07 + rnd() * 0.04, 0.025, 2600 + rnd() * 600, rnd() * 1.2 - 0.6);
-click(52.1, 0.6); thud(52.15, 0.3, 46);
-pad(52.3, 5.6, [38, 45, 50, 57], 0.03, 380);
-for (let w = 0; w < 13; w++) pulse(52.8 + w * 0.215, 0.32);
-whoosh(56.3, 0.8, 0.22); ping(56.9, 69, 0.05, 0.2);
-
-// S6 · just ask 58-77: rewind, the stamp's echo, keys, a tick per step, a chime as the answer lands
-rewind(58.0, 0.9); thud(59.0, 0.32, 60); thud(59.25, 0.14, 60); thud(59.5, 0.06, 60);
-whoosh(60.2, 1.2, 0.22);
-pad(60.4, 5.6, Dm, 0.032, 700); sub(60.4, 6.0, 38, 0.035);
-[[60.9, 69], [62.6, 65], [64.4, 74]].forEach(([t, m]) => piano(t, m, 0.07, 0.15));
-for (let i = 0; i < 22; i++) click(61.7 + i * 0.059 + rnd() * 0.02, 0.12 + rnd() * 0.06);
-click(63.25, 0.5);
-for (let i = 0; i < 4; i++) tick(63.9 + i * 0.62, 0.12, 1700, 0.3);
-whoosh(64.4, 1.4, 0.16);
-whoosh(66.3, 0.6, 0.18); [[66.45, 81], [66.47, 86], [66.49, 89]].forEach(([t, m]) => ping(t, m, 0.05, 0.1));
-[[66.4, 4.6, Bb], [71.0, 3.4, F]].forEach(([t, d, ch]) => { pad(t, d, ch, 0.035, 800); sub(t, d + 0.3, ch[0], 0.035); });
-rise(68.0, 2.2, 0.08);
-[[71.0, 74], [71.4, 77], [71.8, 81]].forEach(([t, m]) => piano(t, m, 0.08, 0.2));
-thud(73.4, 0.3, 64); whoosh(74.0, 0.4, 0.22); thud(74.15, 0.55, 54);
-// 74.6-75.6: near silence (the freeze); then the music returns, handing over to Act 4's Dm
-pad(75.6, 2.0, Dm, 0.05, 900); sub(75.6, 2.0, 38, 0.06);
-[[75.65, 62], [75.67, 69], [75.69, 74]].forEach(([t, m]) => piano(t, m, 0.1, 0.1));
 // ---- reverb (freeverb-style) on the wet bus
 function reverb(inp, spread) {
   const out = new Float32Array(N);

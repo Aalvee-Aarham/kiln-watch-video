@@ -6,12 +6,14 @@ Full source for the *Kiln Watch* pitch video (NASA Space Apps). Rendered MP4s ar
 
 | Path | What |
 |---|---|
-| `kiln-watch-pitch-v7.md` | The script — all four acts, with Time / Visual / Voice-over / On-screen text / Sound columns |
+| `kiln-watch-pitch-v8.md` | The current script: what changed, the live demo, and every narration line with its timestamp |
+| `kiln-watch-pitch-v7.md` | The previous script: all four acts, with Time / Visual / Voice-over / On-screen text / Sound columns |
 | `CONTINUITY.md` | How the acts fit together visually and technically. **Read this first** (and point your AI agent at it) |
 | `act1 using brag/composition/` | Act 1 HyperFrames project (`brag-plan.md`, `composition-brief.md` describe it) |
 | `act2/`, `act3/`, `act4/` | Acts 2–4, each an independent HyperFrames project |
+| `demo/` | The 45 s live site demo (screen recordings + narration), played between Act 3 and Act 4 |
 | `*/assets/score.wav` | Synth music+SFX per act, built by `tools/build-score.mjs` |
-| `merge.sh` | Concats the four act renders into `kiln-watch-full.mp4` (stream copy, no re-encode) |
+| `merge.sh` | Concats the five renders (acts 1–3, demo, act 4) into `kiln-watch-full.mp4` (stream copy, no re-encode) |
 | `hyperframes/` | Git submodule — the HyperFrames framework at the exact commit used |
 
 ## Render the exact same video
@@ -26,6 +28,7 @@ cd kiln-watch-video
 (cd "act1 using brag/composition" && npx --yes hyperframes@0.8.143 render -o renders/act1-final.mp4)
 (cd act2 && npm run render -- -o renders/act2-final.mp4)
 (cd act3 && npm run render -- -o renders/act3-final.mp4)
+(cd demo && npm run render -- -o renders/demo-final.mp4)
 (cd act4 && npm run render -- -o renders/act4-final.mp4)
 
 # stitch (needs ffmpeg on PATH, or FFMPEG=/path/to/ffmpeg)
@@ -44,5 +47,6 @@ Easiest path: open the repo in Claude Code (each act has `CLAUDE.md` / `AGENTS.m
 
 ## Notes
 
-- Narration audio for `kiln-watch-full-narrated.mp4` is not in this repo — the act renders are music + SFX only.
+- Narration is part of each project (`assets/vo/`, Kokoro TTS voice `am_michael`), so every render has voice, music and SFX.
+- The demo recordings (`demo/assets/rec/*.mp4`) are git-ignored like all MP4s. Keep a copy, or re-record them from the live site.
 - `merge.sh` uses `ffmpeg` from PATH. If yours is installed somewhere else: `FFMPEG=/path/to/ffmpeg bash merge.sh`.
